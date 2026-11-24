@@ -680,14 +680,15 @@ function camLoop(el, getDelay){
 }
 var doorOpen=false, doorTimer=null;
 function showDoor(){ doorOpen=true; $('door').className='ov door show'; clearTimeout(doorTimer); doorTimer=setTimeout(hideDoor, CFG.doorShowSec*1000); }
-function hideDoor(){ doorOpen=false; $('door').className='ov door'; clearTimeout(doorTimer); }
+var doorMuteUntil=0;
+function hideDoor(){ doorOpen=false; doorMuteUntil=Date.now()+20000; $('door').className='ov door'; clearTimeout(doorTimer); }
 function varId(name){ var r=null; each(S.vars,function(v,k){ if(v.name===name) r=k; }); return r; }
 var doorBusy=false;
 function pollDoorbell(){
   var id=varId(CFG.doorbellVar); if(!id||doorBusy) return;
   doorBusy=true;
   api('GET','manager/logic/variable/'+id).then(function(v){
-    if(v && v.value===true){ go(1); showDoor(); return api('PUT','manager/logic/variable/'+id,{variable:{value:false}}); }
+    if(v && v.value===true){ if(Date.now()>doorMuteUntil){ go(1); showDoor(); } return api('PUT','manager/logic/variable/'+id,{value:false}); }
   }).catch(function(){}).then(function(){ doorBusy=false; });
 }
 
@@ -738,7 +739,7 @@ loadWeather(); setInterval(loadWeather, 30*60*1000);
 start();
 setInterval(function(){ var d=new Date(); if(d.getHours()===4 && d.getMinutes()===0) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-24-v5';
+var VERSION='2026-11-24-v6';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
