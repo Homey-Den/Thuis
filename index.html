@@ -667,12 +667,13 @@ function renderWeather(w){
 
 /* ---------- deurbel ---------- */
 function camUrl(){ var d=byName(CFG.doorbellDevice); if(!d||!d.images||!d.images.length) return null; var im=d.images[0].imageObj; return im ? HOST+im.url : null; }
-function camLoop(el, getDelay){
+function camLoop(getEl, getDelay){
   function next(){
+    if(document.hidden){ setTimeout(next,3000); return; }
     var u= DEMO? demoCam() : camUrl();
     if(!u){ setTimeout(next,2000); return; }
     var n=new Image();
-    n.onload=function(){ el.src=n.src; setTimeout(next,getDelay()); };
+    n.onload=function(){ getEl().src=n.src; n.onload=null; n=null; setTimeout(next,getDelay()); };
     n.onerror=function(){ setTimeout(next,3000); };
     n.src= DEMO ? u : u+(u.indexOf('?')<0?'?':'&')+'t='+Date.now();
   }
@@ -730,16 +731,16 @@ function start(){
   setInterval(loadLive, CFG.pollMs);
   setInterval(function(){ loadStatic().catch(function(){}); }, 10*60*1000);
   setInterval(pollDoorbell, 1500);
-  camLoop($('camImg'), function(){ return doorOpen ? 5000 : 1000; });
-  camLoop($('doorImg'), function(){ return doorOpen ? 300 : 4000; });
+  camLoop(function(){ return doorOpen ? $('doorImg') : $('camImg'); }, function(){ return doorOpen ? 700 : 2000; });
   loadEZ(); setInterval(loadEZ, 30*60*1000);
 }
 tick(); setInterval(tick,10000);
 loadWeather(); setInterval(loadWeather, 30*60*1000);
 start();
-setInterval(function(){ var d=new Date(); if(d.getHours()===4 && d.getMinutes()===0) location.reload(); }, 60000);
+var bootT=Date.now();
+setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-24-v6';
+var VERSION='2026-11-24-v7';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
