@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Thuis">
 <title>Thuis</title>
 <style>
@@ -18,50 +18,51 @@
     -webkit-user-select:none;user-select:none;overflow:hidden;}
   .screen{position:absolute;left:0;top:0;width:100%;height:100%;display:none;}
   .screen.show{display:block;}
-  .app{display:grid;height:100%;padding:14px;grid-template-columns:250px 1fr 290px;grid-gap:14px;}
-  .col{display:flex;flex-direction:column;min-height:0;}
-  .col > * + *{margin-top:14px;}
-  .card{background:var(--card);border-radius:18px;padding:14px 16px;}
-  .lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:0 0 10px;display:flex;justify-content:space-between;}
+  .app{display:grid;height:100%;padding:12px;grid-template-columns:240px minmax(0,1fr) 280px;grid-template-rows:100%;grid-gap:12px;}
+  .col{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden;}
+  .col > * + *{margin-top:12px;}
+  .card{background:var(--card);border-radius:16px;padding:12px 14px;flex:none;}
+  .card.grow{flex:1 1 auto;}
+  .lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:0 0 8px;display:flex;justify-content:space-between;}
   .grow{flex:1;min-height:0;}
   .btn-a:active,.act:active,.mood:active,.mt:active,.ctl:active,.fav:active,.chip:active{opacity:.65;}
 
   /* klok */
-  .clock{font-size:76px;font-weight:200;line-height:1;letter-spacing:-2px;}
-  .date{font-size:18px;color:var(--mut);margin-top:6px;text-transform:capitalize;}
-  .wx{display:flex;align-items:center;margin-top:16px;}
-  .wx .ic{font-size:40px;margin-right:12px;}
-  .wx .t{font-size:34px;font-weight:300;}
-  .wx .d{font-size:14px;color:var(--mut);}
-  .fc{display:flex;margin-top:12px;}
+  .clock{font-size:64px;font-weight:200;line-height:1;letter-spacing:-2px;}
+  .date{font-size:16px;color:var(--mut);margin-top:4px;text-transform:capitalize;}
+  .wx{display:flex;align-items:center;margin-top:10px;}
+  .wx .ic{font-size:34px;margin-right:12px;}
+  .wx .t{font-size:28px;font-weight:300;}
+  .wx .d{font-size:13px;color:var(--mut);}
+  .fc{display:flex;margin-top:8px;}
   .fc div{flex:1;text-align:center;font-size:13px;color:var(--mut);}
   .fc b{display:block;color:var(--txt);font-weight:500;font-size:15px;margin-top:2px;}
 
   /* aanwezigheid */
   .p{display:flex;align-items:center;}
-  .p + .p{margin-top:10px;}
-  .av{width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;
+  .p + .p{margin-top:8px;}
+  .av{width:38px;height:38px;border-radius:19px;display:flex;align-items:center;justify-content:center;
     font-weight:600;font-size:17px;margin-right:10px;background:var(--card2);color:var(--mut);}
   .p.home .av{background:var(--ok);color:#0f1115;}
   .p small{display:block;color:var(--mut);font-size:12px;}
 
   /* temperaturen */
-  .bigT{font-size:40px;font-weight:300;}
+  .bigT{font-size:34px;font-weight:300;}
   .bigT small{font-size:15px;color:var(--mut);margin-left:6px;}
   .bigT.old{color:#5c6270;}
-  .tp{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;margin-top:9px;}
+  .tp{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-top:6px;}
   .tp span{color:var(--mut);} .tp b{font-weight:500;}
   .tp.old b,.tp.old span{color:#5c6270;}
   .tp .w{font-size:12px;margin-right:4px;}
 
   /* camera */
-  .cam{position:relative;border-radius:12px;overflow:hidden;background:#000;height:208px;}
+  .cam{position:relative;border-radius:12px;overflow:hidden;background:#000;height:176px;}
   .cam img{width:100%;height:100%;object-fit:cover;display:block;}
   .cam .tag{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:8px;font-size:12px;}
 
   /* knoppen */
   .acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:8px;}
-  .act{background:var(--card2);border-radius:13px;height:52px;display:flex;align-items:center;justify-content:center;
+  .act{background:var(--card2);border-radius:13px;height:48px;overflow:hidden;display:flex;align-items:center;justify-content:center;
     font-size:14px;font-weight:600;line-height:1.15;text-align:center;padding:0 6px;}
   .act .i{font-size:18px;margin-right:6px;line-height:1;}
   .act svg{margin-right:6px;flex:none;}
@@ -75,15 +76,15 @@
   /* roborock */
   .robo{display:flex;align-items:center;}
   .robo .st{flex:1;font-size:14px;}
-  .robo .st b{display:block;font-size:16px;margin-bottom:2px;}
+  .robo .st b{display:block;font-size:15px;margin-bottom:2px;}
   .robo .st span{color:var(--mut);}
   .robo .st .warn{color:#ffb35c;}
   .rbtns{display:grid;grid-template-columns:1fr 1fr 74px;grid-gap:8px;margin-top:10px;}
-  .rbtns .act{height:46px;}
+  .rbtns .act{height:44px;}
 
   /* muziektegel */
   .music{display:flex;align-items:center;}
-  .art{width:64px;height:64px;border-radius:10px;background:#2a2f3a center/cover no-repeat;flex:none;display:flex;align-items:center;justify-content:center;font-size:26px;color:#555b68;}
+  .art{width:56px;height:56px;border-radius:10px;background:#2a2f3a center/cover no-repeat;flex:none;display:flex;align-items:center;justify-content:center;font-size:26px;color:#555b68;}
   .mt{flex:1;min-width:0;margin:0 10px;}
   .mt b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .mt span{display:block;font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
@@ -93,16 +94,17 @@
   .ctl.big svg{fill:#0f1115;}
 
   /* energie */
-  .pw{font-size:38px;font-weight:300;}
+  .pw{font-size:34px;font-weight:300;}
   .pw.ret{color:var(--ok);}
   .pw small{font-size:14px;color:var(--mut);margin-left:6px;}
   .pnow{font-size:15px;margin-top:4px;}
-  .erow{display:flex;justify-content:space-between;font-size:14px;margin-top:9px;}
+  .erow{display:flex;justify-content:space-between;font-size:14px;margin-top:8px;}
+  .erow span{flex:none;margin-right:8px;} .erow b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .erow span{color:var(--mut);} .erow b{font-weight:600;text-align:right;}
   .price{display:inline-block;padding:2px 8px;border-radius:8px;font-weight:600;}
   .price.lo{background:#1f4d33;color:#7ff0a8;} .price.mid{background:#4d421f;color:#f5d67f;} .price.hi{background:#4d1f1f;color:#ff9b9b;}
-  .chart{display:flex;align-items:flex-end;height:96px;margin:14px 0 6px;}
-  .bar{flex:1;margin:0 2px;text-align:center;font-size:10px;color:var(--mut);}
+  .chart{display:flex;align-items:flex-end;height:92px;overflow:hidden;margin:14px 0 6px;}
+  .bar{flex:1 1 0;min-width:0;margin:0 2px;text-align:center;font-size:10px;color:var(--mut);}
   .bar i{display:block;border-radius:4px 4px 2px 2px;margin-bottom:4px;}
   .bar.now{color:var(--txt);font-weight:700;}
   .bar.now i{box-shadow:0 0 0 2px #fff;}
@@ -186,7 +188,7 @@
       <div class="acts">
         <div class="act cook" id="cook"><span class="i">🍳</span>Kookmodus</div>
         <div class="act night" id="night"><span class="i">🌙</span>Nachtstand</div>
-        <div class="act off" id="alloff"><span class="i">⏻</span>Alles uit</div>
+        <div class="act off" id="alloff"><svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px"><path d="M12 3v9" stroke="#8a90a0" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0" stroke="#8a90a0" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>Alles uit</div>
         <div class="act" data-mood="Verguld"><span class="dot" style="background:#e8b04a"></span>Verguld</div>
         <div class="act" data-mood="Oosters"><span class="dot" style="background:#e0583a"></span>Oosters</div>
         <div class="act lamp" id="garland"><svg width="26" height="17" viewBox="0 0 34 22"><path d="M1 4 Q9 13 17 6 Q25 0 33 9" fill="none" stroke="#9aa0ad" stroke-width="1.5"/><ellipse cx="5" cy="11" rx="2.6" ry="3.6" fill="#ffcf4a"/><ellipse cx="12" cy="13" rx="2.6" ry="3.6" fill="#ff6b6b"/><ellipse cx="20" cy="9" rx="2.6" ry="3.6" fill="#5fd38d"/><ellipse cx="28" cy="10" rx="2.6" ry="3.6" fill="#7cc4ff"/></svg>Lampjes voortuin</div>
@@ -198,7 +200,7 @@
       <div class="rbtns">
         <div class="act" id="roboAll"><span class="i">🧹</span>Hele woning</div>
         <div class="act" id="roboKitchen"><span class="i">🧽</span>Keuken dweilen</div>
-        <div class="act off" id="roboStop">⏹ Stop</div>
+        <div class="act off" id="roboStop"><svg width="12" height="12" viewBox="0 0 12 12" style="margin-right:6px"><rect width="12" height="12" rx="2" fill="#8a90a0"/></svg>Stop</div>
       </div>
     </div>
     <div class="card grow">
@@ -735,6 +737,14 @@ tick(); setInterval(tick,10000);
 loadWeather(); setInterval(loadWeather, 30*60*1000);
 start();
 setInterval(function(){ var d=new Date(); if(d.getHours()===4 && d.getMinutes()===0) location.reload(); }, 60000);
+/* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
+var VERSION='2026-11-24-v5';
+setInterval(function(){
+  if(DEMO) return;
+  fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
+    var m=/var VERSION='([^']+)'/.exec(t); if(m && m[1]!==VERSION) location.reload();
+  }).catch(function(){});
+}, 5*60000);
 
 /* ---------- demo-modus (?demo=1) ---------- */
 function demoApi(method,path){
