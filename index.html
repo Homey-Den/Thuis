@@ -151,6 +151,8 @@
   .setup input{width:100%;font-size:18px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--txt);margin:6px 0 14px;-webkit-user-select:text;user-select:text;}
   .btn{display:inline-block;background:var(--acc);color:#1a1300;font-weight:600;padding:12px 22px;border-radius:12px;font-size:17px;}
   .err{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:#5a1f1f;color:#ffd0d0;padding:8px 16px;border-radius:10px;font-size:14px;display:none;z-index:20;}
+  .sleep{position:fixed;left:0;top:0;right:0;bottom:0;background:#000;z-index:30;display:none;}
+  .sleep.show{display:block;}
   .toast{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:#22303f;padding:8px 16px;border-radius:10px;font-size:14px;display:none;z-index:20;}
 </style>
 </head>
@@ -262,6 +264,7 @@
   <p style="color:var(--mut);font-size:13px;margin-top:16px">De sleutel wordt alleen op deze iPad bewaard. Instellingen openen: houd de klok 2 seconden ingedrukt.</p>
 </div></div>
 
+<div class="sleep" id="sleep"></div>
 <div class="err" id="err"></div>
 <div class="toast" id="toast"></div>
 
@@ -289,6 +292,8 @@ var CFG = {
   p1: 'P1 Meter', prices: 'Energieprijzen', ev: 'Laadpaal',
   robot: 'Jacqueline', robotKitchenRooms: 'keuken',
   musicZone: 'Keuken',
+  motion: 'Beweging keuken',
+  sleepMin: 5,
   pollMs: 8000
 };
 
@@ -669,7 +674,7 @@ function renderWeather(w){
 function camUrl(){ var d=byName(CFG.doorbellDevice); if(!d||!d.images||!d.images.length) return null; var im=d.images[0].imageObj; return im ? HOST+im.url : null; }
 function camLoop(getEl, getDelay){
   function next(){
-    if(document.hidden){ setTimeout(next,3000); return; }
+    if(document.hidden || (asleep && !doorOpen)){ setTimeout(next,3000); return; }
     var u= DEMO? demoCam() : camUrl();
     if(!u){ setTimeout(next,2000); return; }
     var n=new Image();
@@ -679,8 +684,22 @@ function camLoop(getEl, getDelay){
   }
   next();
 }
+/* ---------- scherm slapen bij geen beweging ---------- */
+var lastMotion=Date.now(), asleep=false, motionId=null;
+function wake(){ lastMotion=Date.now(); if(asleep){ asleep=false; $('sleep').className='sleep'; loadLive(); } }
+function goSleep(){ if(asleep||doorOpen) return; asleep=true; $('sleep').className='sleep show'; go(1); }
+function pollMotion(){
+  if(!motionId){ var m=byName(CFG.motion); if(m) motionId=m.id; else return; }
+  api('GET','manager/devices/device/'+motionId).then(function(d){
+    if(cap(d,'alarm_motion')===true) wake();
+  }).catch(function(){});
+  if(!asleep && Date.now()-lastMotion > CFG.sleepMin*60000) goSleep();
+}
+document.addEventListener('touchstart',function(){ if(!asleep) lastMotion=Date.now(); },true);
+$('sleep').addEventListener('click',function(e){ e.stopPropagation(); wake(); });
+
 var doorOpen=false, doorTimer=null;
-function showDoor(){ doorOpen=true; $('door').className='ov door show'; clearTimeout(doorTimer); doorTimer=setTimeout(hideDoor, CFG.doorShowSec*1000); }
+function showDoor(){ wake(); doorOpen=true; $('door').className='ov door show'; clearTimeout(doorTimer); doorTimer=setTimeout(hideDoor, CFG.doorShowSec*1000); }
 var doorMuteUntil=0;
 function hideDoor(){ doorOpen=false; doorMuteUntil=Date.now()+20000; $('door').className='ov door'; clearTimeout(doorTimer); }
 function varId(name){ var r=null; each(S.vars,function(v,k){ if(v.name===name) r=k; }); return r; }
@@ -728,9 +747,10 @@ function start(){
   if(!DEMO && !KEY){ openSetup(); return; }
   loadStatic().then(loadLive).catch(function(e){ showErr('Geen verbinding met Homey: '+e.message); });
   if(started) return; started=true;
-  setInterval(loadLive, CFG.pollMs);
+  setInterval(function(){ if(!asleep) loadLive(); }, CFG.pollMs);
   setInterval(function(){ loadStatic().catch(function(){}); }, 10*60*1000);
   setInterval(pollDoorbell, 1500);
+  setInterval(pollMotion, 3000);
   camLoop(function(){ return doorOpen ? $('doorImg') : $('camImg'); }, function(){ return doorOpen ? 700 : 2000; });
   loadEZ(); setInterval(loadEZ, 30*60*1000);
 }
@@ -740,7 +760,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-24-v7';
+var VERSION='2026-11-24-v8';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
