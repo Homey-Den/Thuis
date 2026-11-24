@@ -384,6 +384,7 @@ var CFG = {
   robot: 'Jacqueline', robotKitchenRooms: 'keuken',
   musicZone: 'Keuken',
   motion: 'Beweging keuken',
+  lightZones: [['Woonkamer','Woonkamer'],['Keuken','Keuken'],['Garage','Garage'],['Terras','Veranda'],['Tuin','Tuin'],['Voortuin','Voortuin']],
   lightGroups: [{name:'Keukenlampen', members:['Lamp keuken 1','Lamp keuken 2','Lamp keuken 3']},
                 {name:'Lichtstaven', members:['Lichtstaaf woonkamer 1','Lichtstaaf woonkamer 2']}],
   doorbellIp: '192.168.1.200',
@@ -566,11 +567,12 @@ function renderLights(){
     LG[gd.id]=gd; (byZone[f.zone]=byZone[f.zone]||[]).push(gd);
   });
   each(S.devices,function(d){ if(isLamp(d) && !grouped[d.id]){ (byZone[d.zone]=byZone[d.zone]||[]).push(d); } });
-  var zs=Object.keys(byZone).sort(function(a,b){ var A=(S.zones[a]||{}).name||'', B=(S.zones[b]||{}).name||''; return A<B?-1:1; });
+  var zs=[], zl={};
+  CFG.lightZones.forEach(function(x){ var id=zoneId(x[0]); if(id && byZone[id]){ zs.push(id); zl[id]=x[1]; } });
   var h='';
   zs.forEach(function(z){
     var list=byZone[z].sort(function(a,b){ return a.name<b.name?-1:1; });
-    h+='<div class="zone"><div class="zh">'+esc((S.zones[z]||{}).name||'Overig')+'<span><div class="chip" data-za="'+z+'" data-v="1">Alles aan</div><div class="chip" data-za="'+z+'" data-v="0">Alles uit</div></span></div><div class="lamps">';
+    h+='<div class="zone"><div class="zh">'+esc(zl[z])+'<span><div class="chip" data-za="'+z+'" data-v="1">Alles aan</div><div class="chip" data-za="'+z+'" data-v="0">Alles uit</div></span></div><div class="lamps">';
     list.forEach(function(d){
       var on=cap(d,'onoff'), dim=cap(d,'dim');
       h+='<div class="lp'+(on?' on':'')+'" data-id="'+d.id+'"><div class="r1"><div class="n">'+esc(d.name)+'</div><div class="sw"></div></div>';
@@ -1027,7 +1029,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-24-v13';
+var VERSION='2026-11-24-v15';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
