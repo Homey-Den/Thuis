@@ -10,19 +10,21 @@
 <style>
   :root{
     --bg:#0f1115; --card:#191c23; --card2:#22262f; --line:#2c313c;
-    --txt:#eef0f4; --mut:#8a90a0; --acc:#f5b94a; --cool:#7cc4ff; --ok:#5fd38d; --bad:#ff6b6b;
+    --txt:#eef0f4; --mut:#8a90a0; --acc:#f5b94a; --ok:#5fd38d; --bad:#ff6b6b;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
     font-family:-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif;
     -webkit-user-select:none;user-select:none;overflow:hidden;}
-  .app{display:grid;height:100%;padding:14px;
-    grid-template-columns:250px 1fr 280px;grid-gap:14px;}
+  .screen{position:absolute;left:0;top:0;width:100%;height:100%;display:none;}
+  .screen.show{display:block;}
+  .app{display:grid;height:100%;padding:14px;grid-template-columns:250px 1fr 290px;grid-gap:14px;}
   .col{display:flex;flex-direction:column;min-height:0;}
   .col > * + *{margin-top:14px;}
-  .card{background:var(--card);border-radius:18px;padding:16px;}
-  .lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:0 0 10px;}
+  .card{background:var(--card);border-radius:18px;padding:14px 16px;}
+  .lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:0 0 10px;display:flex;justify-content:space-between;}
   .grow{flex:1;min-height:0;}
+  .btn-a:active,.act:active,.mood:active,.mt:active,.ctl:active,.fav:active,.chip:active{opacity:.65;}
 
   /* klok */
   .clock{font-size:76px;font-weight:200;line-height:1;letter-spacing:-2px;}
@@ -36,7 +38,6 @@
   .fc b{display:block;color:var(--txt);font-weight:500;font-size:15px;margin-top:2px;}
 
   /* aanwezigheid */
-  .ppl{display:flex;flex-direction:column;}
   .p{display:flex;align-items:center;}
   .p + .p{margin-top:10px;}
   .av{width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;
@@ -44,70 +45,107 @@
   .p.home .av{background:var(--ok);color:#0f1115;}
   .p small{display:block;color:var(--mut);font-size:12px;}
 
-  /* lampen */
-  .rooms{display:grid;grid-template-columns:repeat(3,1fr);grid-gap:12px;}
-  .room{background:var(--card2);border-radius:16px;padding:16px;min-height:170px;position:relative;
-    transition:background .2s;}
-  .room.on{background:linear-gradient(160deg,#4a3a17,#2a2418);}
-  .room .nm{font-size:20px;font-weight:600;}
-  .room .st{font-size:13px;color:var(--mut);margin-top:4px;}
-  .room.on .st{color:var(--acc);}
-  .room .bulb{font-size:26px;position:absolute;left:16px;bottom:16px;opacity:.35;}
-  .room.on .bulb{opacity:1;}
-  .room .more{font-size:12px;color:var(--mut);margin-top:2px;}
-  .tog{position:absolute;right:14px;bottom:14px;width:62px;height:36px;border-radius:18px;background:#3a3f4b;}
-  .tog:after{content:"";position:absolute;left:4px;top:4px;width:28px;height:28px;border-radius:14px;background:#fff;
-    transition:left .2s;}
-  .room.on .tog{background:var(--acc);}
-  .room.on .tog:after{left:30px;}
-
-  .cook{margin-top:12px;display:flex;align-items:center;justify-content:center;height:64px;border-radius:16px;
-    background:linear-gradient(90deg,#2b5876,#4e4376);font-size:20px;font-weight:600;}
-  .cook:active,.mood:active,.room:active{opacity:.7;}
-  .moods{display:grid;grid-template-columns:repeat(3,1fr);grid-gap:10px;}
-  .mood{background:var(--card2);border-radius:14px;padding:22px 14px;font-size:16px;font-weight:500;display:flex;align-items:center;}
-  .mood i{width:14px;height:14px;border-radius:7px;margin-right:10px;font-style:normal;flex:none;}
-  .alloff{margin-top:12px;text-align:center;padding:12px;border-radius:14px;background:var(--card2);color:var(--mut);font-size:15px;}
-
   /* temperaturen */
-  .temps{display:grid;grid-template-columns:1fr;grid-gap:9px;}
-  .tp{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;}
-  .tp span{color:var(--mut);}
-  .tp b{font-weight:500;}
   .bigT{font-size:40px;font-weight:300;}
   .bigT small{font-size:15px;color:var(--mut);margin-left:6px;}
+  .bigT.old{color:#5c6270;}
+  .tp{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;margin-top:9px;}
+  .tp span{color:var(--mut);} .tp b{font-weight:500;}
+  .tp.old b,.tp.old span{color:#5c6270;}
+  .tp .w{font-size:12px;margin-right:4px;}
 
-  /* energie */
-  .pw{font-size:36px;font-weight:300;}
-  .pw.ret{color:var(--ok);}
-  .pw small{font-size:14px;color:var(--mut);margin-left:6px;}
-  .erow{display:flex;justify-content:space-between;font-size:14px;margin-top:7px;}
-  .erow span{color:var(--mut);}
-  .price{display:inline-block;padding:2px 8px;border-radius:8px;font-weight:600;}
-  .price.lo{background:#1f4d33;color:#7ff0a8;} .price.mid{background:#4d421f;color:#f5d67f;} .price.hi{background:#4d1f1f;color:#ff9b9b;}
-
-  /* deurbel */
-  .cam{position:relative;border-radius:14px;overflow:hidden;background:#000;height:190px;}
+  /* camera */
+  .cam{position:relative;border-radius:12px;overflow:hidden;background:#000;height:208px;}
   .cam img{width:100%;height:100%;object-fit:cover;display:block;}
   .cam .tag{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:8px;font-size:12px;}
+
+  /* knoppen */
+  .acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:8px;}
+  .act{background:var(--card2);border-radius:13px;height:52px;display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:600;line-height:1.15;text-align:center;padding:0 6px;}
+  .act .i{font-size:18px;margin-right:6px;line-height:1;}
+  .act svg{margin-right:6px;flex:none;}
+  .act .dot{width:12px;height:12px;border-radius:6px;margin-right:8px;flex:none;}
+  .act.cook{background:linear-gradient(90deg,#2b5876,#4e4376);}
+  .act.cook.on{background:linear-gradient(90deg,#e0a43a,#c8692b);color:#1a1300;}
+  .act.night{background:linear-gradient(90deg,#3a2a5c,#5c2a3a);}
+  .act.lamp.on{background:linear-gradient(90deg,#4a3a17,#6a4a17);color:#ffe3a3;}
+  .act.off{color:var(--mut);}
+
+  /* roborock */
+  .robo{display:flex;align-items:center;}
+  .robo .st{flex:1;font-size:14px;}
+  .robo .st b{display:block;font-size:16px;margin-bottom:2px;}
+  .robo .st span{color:var(--mut);}
+  .robo .st .warn{color:#ffb35c;}
+  .rbtns{display:grid;grid-template-columns:1fr 1fr 74px;grid-gap:8px;margin-top:10px;}
+  .rbtns .act{height:46px;}
+
+  /* muziektegel */
+  .music{display:flex;align-items:center;}
+  .art{width:64px;height:64px;border-radius:10px;background:#2a2f3a center/cover no-repeat;flex:none;display:flex;align-items:center;justify-content:center;font-size:26px;color:#555b68;}
+  .mt{flex:1;min-width:0;margin:0 10px;}
+  .mt b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mt span{display:block;font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .ctl{width:44px;height:44px;border-radius:22px;background:var(--card2);display:flex;align-items:center;justify-content:center;margin-left:6px;flex:none;}
+  .ctl svg{fill:#eef0f4;}
+  .ctl.big{width:50px;height:50px;border-radius:25px;background:#eef0f4;}
+  .ctl.big svg{fill:#0f1115;}
+
+  /* energie */
+  .pw{font-size:38px;font-weight:300;}
+  .pw.ret{color:var(--ok);}
+  .pw small{font-size:14px;color:var(--mut);margin-left:6px;}
+  .pnow{font-size:15px;margin-top:4px;}
+  .erow{display:flex;justify-content:space-between;font-size:14px;margin-top:9px;}
+  .erow span{color:var(--mut);} .erow b{font-weight:600;text-align:right;}
+  .price{display:inline-block;padding:2px 8px;border-radius:8px;font-weight:600;}
+  .price.lo{background:#1f4d33;color:#7ff0a8;} .price.mid{background:#4d421f;color:#f5d67f;} .price.hi{background:#4d1f1f;color:#ff9b9b;}
+  .chart{display:flex;align-items:flex-end;height:96px;margin:14px 0 6px;}
+  .bar{flex:1;margin:0 2px;text-align:center;font-size:10px;color:var(--mut);}
+  .bar i{display:block;border-radius:4px 4px 2px 2px;margin-bottom:4px;}
+  .bar.now{color:var(--txt);font-weight:700;}
+  .bar.now i{box-shadow:0 0 0 2px #fff;}
+  .sep{border-top:1px solid var(--line);margin:12px 0 2px;}
+
+  /* scherm 2 */
+  .s2{height:100%;padding:14px;display:flex;flex-direction:column;}
+  .s2head{display:flex;align-items:center;margin-bottom:12px;}
+  .back{background:var(--card);border-radius:12px;padding:10px 16px;font-size:16px;font-weight:600;}
+  .s2head h1{font-size:24px;margin:0 0 0 16px;font-weight:600;}
+  .players{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:12px;}
+  .pl{background:var(--card);border-radius:16px;padding:12px;}
+  .pl .top{display:flex;align-items:center;}
+  .pl .art{width:56px;height:56px;}
+  .pl .nm{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;}
+  .pl.playing .nm{color:var(--ok);}
+  .pl .row2{display:flex;align-items:center;margin-top:10px;}
+  .pl .row2 input{flex:1;margin-left:8px;height:30px;}
+  .pl .ctl{width:38px;height:38px;margin-left:0;margin-right:6px;}
+  .pl .ctl.big{width:42px;height:42px;}
+  .favs{background:var(--card);border-radius:16px;padding:12px 14px;margin-top:12px;}
+  .chips{display:flex;flex-wrap:wrap;margin:-4px;}
+  .chip{background:var(--card2);border-radius:18px;padding:8px 14px;font-size:14px;margin:4px;}
+  .chip.sel{background:var(--acc);color:#1a1300;font-weight:600;}
+  .fav{display:flex;align-items:center;background:var(--card2);border-radius:12px;padding:8px;margin:4px;width:calc(25% - 8px);}
+  .fav .art{width:40px;height:40px;border-radius:8px;font-size:18px;}
+  .fav div{margin-left:8px;min-width:0;font-size:13px;}
+  .fav div b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fav div span{color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+  .dots{position:fixed;left:50%;bottom:4px;transform:translateX(-50%);display:flex;z-index:5;}
+  .dots i{width:7px;height:7px;border-radius:4px;background:#3a3f4b;margin:0 4px;}
+  .dots i.on{background:#9aa0ad;}
 
   /* overlays */
   .ov{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.92);display:none;z-index:10;}
   .ov.show{display:block;}
   .door img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;}
-  .door .bar{position:absolute;left:0;right:0;top:0;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;
+  .door .bar2{position:absolute;left:0;right:0;top:0;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;
     background:linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,0));font-size:26px;font-weight:600;}
   .door .x{font-size:16px;font-weight:500;background:rgba(255,255,255,.15);padding:10px 18px;border-radius:12px;}
   .panel{position:absolute;left:50%;top:50%;width:620px;max-height:90%;overflow:auto;-webkit-overflow-scrolling:touch;
     transform:translate(-50%,-50%);background:var(--card);border-radius:20px;padding:22px;}
-  .panel h2{margin:0 0 16px;font-size:24px;display:flex;justify-content:space-between;align-items:center;}
-  .panel h2 span{font-size:16px;font-weight:500;color:var(--mut);background:var(--card2);padding:8px 16px;border-radius:12px;}
-  .lamp{display:flex;align-items:center;padding:12px 0;border-top:1px solid var(--line);}
-  .lamp .n{width:190px;font-size:16px;}
-  .lamp input[type=range]{flex:1;margin:0 16px;height:36px;}
-  .lamp .s{width:58px;height:34px;border-radius:17px;background:#3a3f4b;position:relative;flex:none;}
-  .lamp .s:after{content:"";position:absolute;left:4px;top:4px;width:26px;height:26px;border-radius:13px;background:#fff;}
-  .lamp.on .s{background:var(--acc);} .lamp.on .s:after{left:28px;}
+  .panel h2{margin:0 0 16px;font-size:24px;}
   .setup input{width:100%;font-size:18px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--txt);margin:6px 0 14px;-webkit-user-select:text;user-select:text;}
   .btn{display:inline-block;background:var(--acc);color:#1a1300;font-weight:600;padding:12px 22px;border-radius:12px;font-size:17px;}
   .err{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:#5a1f1f;color:#ffd0d0;padding:8px 16px;border-radius:10px;font-size:14px;display:none;z-index:20;}
@@ -115,7 +153,9 @@
 </style>
 </head>
 <body>
-<div class="app">
+
+<!-- ================= SCHERM 1 ================= -->
+<div class="screen show" id="scr1"><div class="app">
   <!-- links -->
   <div class="col">
     <div class="card" id="clockCard">
@@ -126,55 +166,88 @@
     </div>
     <div class="card">
       <div class="lbl">Thuis</div>
-      <div class="ppl" id="ppl"></div>
+      <div id="ppl"></div>
     </div>
     <div class="card grow">
       <div class="lbl">Temperatuur</div>
       <div class="bigT" id="tMain">--°<small>woonkamer</small></div>
-      <div class="temps" id="temps" style="margin-top:12px"></div>
+      <div id="temps" style="margin-top:4px"></div>
     </div>
   </div>
 
   <!-- midden -->
   <div class="col">
     <div class="card">
+      <div class="lbl">Voordeur</div>
+      <div class="cam"><img id="camImg" alt=""><div class="tag">Live</div></div>
+    </div>
+    <div class="card">
       <div class="lbl">Verlichting</div>
-      <div class="rooms" id="rooms"></div>
-      <div class="cook" id="cook">🍳&nbsp; Kookmodus</div>
+      <div class="acts">
+        <div class="act cook" id="cook"><span class="i">🍳</span>Kookmodus</div>
+        <div class="act night" id="night"><span class="i">🌙</span>Nachtstand</div>
+        <div class="act off" id="alloff"><span class="i">⏻</span>Alles uit</div>
+        <div class="act" data-mood="Verguld"><span class="dot" style="background:#e8b04a"></span>Verguld</div>
+        <div class="act" data-mood="Oosters"><span class="dot" style="background:#e0583a"></span>Oosters</div>
+        <div class="act lamp" id="garland"><svg width="26" height="17" viewBox="0 0 34 22"><path d="M1 4 Q9 13 17 6 Q25 0 33 9" fill="none" stroke="#9aa0ad" stroke-width="1.5"/><ellipse cx="5" cy="11" rx="2.6" ry="3.6" fill="#ffcf4a"/><ellipse cx="12" cy="13" rx="2.6" ry="3.6" fill="#ff6b6b"/><ellipse cx="20" cy="9" rx="2.6" ry="3.6" fill="#5fd38d"/><ellipse cx="28" cy="10" rx="2.6" ry="3.6" fill="#7cc4ff"/></svg>Lampjes voortuin</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="lbl">Roborock</div>
+      <div class="robo"><div class="st" id="roboSt"><b>--</b><span></span></div></div>
+      <div class="rbtns">
+        <div class="act" id="roboAll"><span class="i">🧹</span>Hele woning</div>
+        <div class="act" id="roboKitchen"><span class="i">🧽</span>Keuken dweilen</div>
+        <div class="act off" id="roboStop">⏹ Stop</div>
+      </div>
     </div>
     <div class="card grow">
-      <div class="lbl">Sfeer</div>
-      <div class="moods" id="moods"></div>
-      <div class="alloff" id="alloff">Alle lampen beneden uit</div>
+      <div class="lbl"><span>Muziek · keuken</span><span>alle spelers ›</span></div>
+      <div class="music" id="musicTile">
+        <div class="art" id="mArt">♪</div>
+        <div class="mt" id="mText"><b>--</b><span></span></div>
+        <div class="ctl" id="mPrev"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M6 5h2v14H6zM9.5 12 19 5v14z"/></svg></div>
+        <div class="ctl big" id="mPlay"></div>
+        <div class="ctl" id="mNext"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM5 5l9.5 7L5 19z"/></svg></div>
+      </div>
     </div>
   </div>
 
   <!-- rechts -->
   <div class="col">
-    <div class="card">
-      <div class="lbl">Voordeur</div>
-      <div class="cam" id="camSmall"><img id="camImg" alt=""><div class="tag">Live</div></div>
-    </div>
     <div class="card grow">
       <div class="lbl">Energie</div>
       <div class="pw" id="pw">-- W</div>
-      <div class="erow"><span>Prijs nu</span><b id="pNow">--</b></div>
-      <div class="erow"><span>Goedkoopste uur</span><b id="pLow">--</b></div>
+      <div class="pnow" id="pNow">--</div>
+      <div class="chart" id="chart"></div>
+      <div class="erow"><span>Goedkoopst (8 uur)</span><b id="pLow">--</b></div>
+      <div class="erow"><span>Goedkoopst morgen</span><b id="pTom">--</b></div>
+      <div class="sep"></div>
       <div class="erow"><span>Stroom vandaag</span><b id="eDay">--</b></div>
       <div class="erow"><span>Gas vandaag</span><b id="gDay">--</b></div>
-      <div class="erow"><span>Airco woonkamer</span><b id="acW">--</b></div>
-      <div class="erow"><span>Airco slaapkamer</span><b id="acS">--</b></div>
+      <div class="sep"></div>
+      <div class="erow"><span>Laadpaal</span><b id="ev">--</b></div>
     </div>
   </div>
-</div>
+</div></div>
+
+<!-- ================= SCHERM 2: MUZIEK ================= -->
+<div class="screen" id="scr2"><div class="s2">
+  <div class="s2head"><div class="back" id="back">‹ Thuis</div><h1>Muziek</h1></div>
+  <div class="players" id="players"></div>
+  <div class="favs">
+    <div class="lbl"><span>Favorieten afspelen op</span></div>
+    <div class="chips" id="targets"></div>
+    <div class="chips" id="favs" style="margin-top:8px"></div>
+  </div>
+</div></div>
+
+<div class="dots"><i id="d1" class="on"></i><i id="d2"></i></div>
 
 <!-- deurbel groot -->
 <div class="ov door" id="door"><img id="doorImg" alt="">
-  <div class="bar"><div>🔔 Er staat iemand voor de deur</div><div class="x" id="doorX">Sluiten</div></div>
+  <div class="bar2"><div>🔔 Er staat iemand voor de deur</div><div class="x">Sluiten</div></div>
 </div>
-
-<!-- ruimte detail -->
-<div class="ov" id="roomOv"><div class="panel" id="roomPanel"></div></div>
 
 <!-- instellingen -->
 <div class="ov" id="setupOv"><div class="panel setup">
@@ -197,33 +270,23 @@
 /* ---------- configuratie ---------- */
 var CFG = {
   host: 'https://192-168-1-66.homey.homeylocal.com',
-  lat: 51.55, lon: 3.67,                       // Veere
-  rooms: [
-    {key:'woonkamer', name:'Woonkamer', zone:'Woonkamer', onMood:'Verguld'},
-    {key:'keuken',    name:'Keuken',    zone:'Keuken'},
-    {key:'hal',       name:'Hal',       zone:'Entree'}
-  ],
-  downstairsZones: ['Woonkamer','Keuken','Entree'],
-  moods: [
-    {name:'Verguld',    color:'#e8b04a'},
-    {name:'Rust',       color:'#f3dfa2'},
-    {name:'Focus',      color:'#cfe8ff'},
-    {name:'Oosters',    color:'#e0583a'},
-    {name:'Heuvels',    color:'#8bc48a'},
-    {name:'Feestdagen', color:'#d94b6a'}
-  ],
+  lat: 51.55, lon: 3.67,
   cookFlow: 'Keuken - Kookmodus',
+  cookZone: 'Keuken',
+  nightFlow: 'Huis - Nachtstand',
+  allOffFlow: 'Huis - Alles uit',
+  garland: 'Lampjes voortuin',
+  garlandOnFlow: 'Voortuin - Lampjes aan (dashboard)',
+  garlandOffFlow: 'Voortuin - Lampjes uit (dashboard + 23:00)',
   doorbellVar: 'Deurbel',
   doorbellDevice: 'voordeur',
   doorShowSec: 60,
-  temps: [ // [apparaatnaam, label]
-    ['Temp Keuken','Keuken'], ['Temp Entree','Hal'], ['Temp Slaapkamer','Slaapkamer'],
-    ['Temp Kantoor','Kantoor'], ['Temp Wasruimte','Wasruimte'], ['Temp Garage','Garage'],
-    ['Temp Domein Jes','Domein Jes']
-  ],
+  temps: [['Temp Keuken','Keuken'],['Temp Entree','Hal'],['Temp Slaapkamer','Slaapkamer'],['Temp Kantoor','Kantoor'],
+          ['Temp Wasruimte','Wasruimte'],['Temp Garage','Garage'],['Temp Domein Jes','Domein Jes']],
   mainTemp: 'Temp Woonkamer',
-  p1: 'P1 Meter', prices: 'Energieprijzen',
-  acW: 'Airco woonkamer', acS: 'Airco slaapkamer',
+  p1: 'P1 Meter', prices: 'Energieprijzen', ev: 'Laadpaal',
+  robot: 'Jacqueline', robotKitchenRooms: 'keuken',
+  musicZone: 'Keuken',
   pollMs: 8000
 };
 
@@ -234,20 +297,19 @@ var store = {
 };
 var HOST = store.get('homeyHost') || CFG.host;
 var KEY = store.get('homeyKey') || '';
-/* sleutel via de link (#key=...), handig via QR-code; blijft in de beginscherm-bladwijzer staan */
-(function(){
-  var m = /[#&]key=([^&]+)/.exec(location.hash || '');
-  if(m){ KEY = decodeURIComponent(m[1]); store.set('homeyKey', KEY); }
-})();
+(function(){ var m=/[#&]key=([^&]+)/.exec(location.hash||''); if(m){ KEY=decodeURIComponent(m[1]); store.set('homeyKey',KEY); } })();
 
-var S = { devices:{}, zones:{}, moods:{}, flows:{}, vars:{}, users:[] };
+var S = { devices:{}, zones:{}, moods:{}, flows:{}, vars:{}, users:[], favs:[] };
 function $(id){ return document.getElementById(id); }
 function each(o,f){ for(var k in o){ if(Object.prototype.hasOwnProperty.call(o,k)) f(o[k],k); } }
 function cap(d,c){ return d && d.capabilitiesObj && d.capabilitiesObj[c] ? d.capabilitiesObj[c].value : null; }
+function has(d,c){ return !!(d && d.capabilitiesObj && d.capabilitiesObj[c]); }
 function byName(n){ var r=null; each(S.devices,function(d){ if(d.name===n) r=d; }); return r; }
 function tap(el,fn){ if(!el) return; el.addEventListener('click',function(e){ e.stopPropagation(); fn(e); }); }
+function esc(s){ return String(s===null||s===undefined?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function pad(n){ return (n<10?'0':'')+n; }
+function nf(v,dec){ return v===null||v===undefined ? '--' : Number(v).toFixed(dec).replace('.',','); }
 
-/* ---------- melding ---------- */
 var errT, toastT;
 function showErr(m){ var e=$('err'); e.textContent=m; e.style.display='block'; clearTimeout(errT); errT=setTimeout(function(){e.style.display='none';},6000); }
 function toast(m){ var e=$('toast'); e.textContent=m; e.style.display='block'; clearTimeout(toastT); toastT=setTimeout(function(){e.style.display='none';},2000); }
@@ -265,6 +327,18 @@ function api(method, path, body){
   });
 }
 function setCap(id,c,v){ return api('PUT','manager/devices/device/'+id+'/capability/'+c,{value:v}); }
+function runCard(devId, card, args){
+  var uri='homey:device:'+devId;
+  return api('POST','manager/flow/flowcardaction/'+uri+'/'+uri+':'+card+'/run',{args:args||{}}).then(function(r){
+    if(r && r.error) throw new Error((r.error.message||'fout').replace('error.',''));
+    return r;
+  });
+}
+function img(d,id){
+  if(!d||!d.images) return null;
+  for(var i=0;i<d.images.length;i++){ if(!id || d.images[i].id===id){ var o=d.images[i].imageObj; return o? HOST+o.url+'?v='+(o.lastUpdated||'') : null; } }
+  return null;
+}
 
 /* ---------- laden ---------- */
 function loadStatic(){
@@ -276,10 +350,7 @@ function loadStatic(){
   ]).then(function(r){ S.zones=r[0]||{}; S.moods=r[1]||{}; S.flows=r[2]||{}; S.vars=r[3]||{}; });
 }
 function loadLive(){
-  return Promise.all([
-    api('GET','manager/devices/device/'),
-    api('GET','manager/users/user/')
-  ]).then(function(r){
+  return Promise.all([ api('GET','manager/devices/device/'), api('GET','manager/users/user/') ]).then(function(r){
     S.devices=r[0]||{}; var u=[]; each(r[1]||{},function(x){u.push(x);}); S.users=u;
     renderAll();
   }).catch(function(e){ showErr('Geen verbinding met Homey: '+e.message); });
@@ -287,151 +358,289 @@ function loadLive(){
 function zoneId(name){ var r=null; each(S.zones,function(z,k){ if(z.name===name) r=k; }); return r; }
 function lightsIn(zoneName){
   var zid=zoneId(zoneName), out=[];
-  each(S.devices,function(d){ if(d.zone===zid && d['class']==='light' && d.capabilitiesObj && d.capabilitiesObj.onoff) out.push(d); });
+  each(S.devices,function(d){ if(d.zone===zid && d['class']==='light' && has(d,'onoff')) out.push(d); });
+  return out;
+}
+function speakers(){
+  var out=[];
+  each(S.devices,function(d){ if(d['class']==='speaker' && has(d,'speaker_playing')) out.push(d); });
   out.sort(function(a,b){ return a.name<b.name?-1:1; });
   return out;
 }
-
-/* ---------- render ---------- */
-function renderAll(){ renderRooms(); renderPeople(); renderTemps(); renderEnergy(); if(openRoom) renderRoomPanel(); }
-
-function renderRooms(){
-  var html='';
-  CFG.rooms.forEach(function(r){
-    var ls=lightsIn(r.zone), on=ls.filter(function(d){return cap(d,'onoff');}).length;
-    html+='<div class="room'+(on?' on':'')+'" data-k="'+r.key+'"><div class="nm">'+r.name+'</div>'+
-      '<div class="st">'+(on? on+' van '+ls.length+' aan' : 'Uit')+'</div>'+
-      '<div class="more">lampen ›</div><div class="tog"></div></div>';
-  });
-  $('rooms').innerHTML=html;
-  Array.prototype.forEach.call($('rooms').querySelectorAll('.room'),function(el){
-    var r=CFG.rooms.filter(function(x){return x.key===el.getAttribute('data-k');})[0];
-    tap(el.querySelector('.tog'),function(){ toggleRoom(r); });
-    tap(el.querySelector('.more'),function(){ openRoomPanel(r); });
-    tap(el,function(){ openRoomPanel(r); });
-  });
+function musicDev(){
+  var zid=zoneId(CFG.musicZone), r=null;
+  each(S.devices,function(d){ if(d.zone===zid && (d.driverId||'').indexOf('com.sonos')>=0) r=d; });
+  return r;
 }
-function toggleRoom(r){
-  var ls=lightsIn(r.zone), anyOn=ls.some(function(d){return cap(d,'onoff');});
-  if(!anyOn && r.onMood){ return setMood(r.onMood); }
-  var p=ls.map(function(d){ d.capabilitiesObj.onoff.value=!anyOn; return setCap(d.id,'onoff',!anyOn); });
-  renderRooms();
-  Promise.all(p).then(function(){ setTimeout(loadLive,800); }).catch(function(e){ showErr(e.message); });
+
+function renderAll(){ renderActs(); renderPeople(); renderTemps(); renderEnergy(); renderRobot(); renderMusic(); if(cur===2) renderPlayers(); }
+
+/* ---------- verlichting ---------- */
+function triggerFlow(name,msg){
+  var id=null; each(S.flows,function(f,k){ if(f.name===name) id=k; });
+  if(!id){ showErr('Flow "'+name+'" niet gevonden'); return Promise.resolve(); }
+  if(msg) toast(msg);
+  return api('POST','manager/flow/advancedflow/'+id+'/trigger').then(function(){ setTimeout(loadLive,1500); })
+    .catch(function(e){ showErr(e.message); });
 }
 function setMood(name){
   var id=null; each(S.moods,function(m,k){ if(m.name===name) id=k; });
   if(!id){ showErr('Mood "'+name+'" niet gevonden'); return; }
-  toast(name+' aan');
-  api('POST','manager/moods/mood/'+id+'/set').then(function(){ setTimeout(loadLive,1200); })
-    .catch(function(e){ showErr(e.message); });
+  store.set('kookPrev',''); renderActs(); toast(name+' aan');
+  api('POST','manager/moods/mood/'+id+'/set').then(function(){ setTimeout(loadLive,1200); }).catch(function(e){ showErr(e.message); });
 }
-function triggerFlow(name){
-  var id=null; each(S.flows,function(f,k){ if(f.name===name) id=k; });
-  if(!id){ showErr('Flow "'+name+'" niet gevonden'); return; }
-  toast('Kookmodus aan');
-  api('POST','manager/flow/advancedflow/'+id+'/trigger').then(function(){ setTimeout(loadLive,1500); })
-    .catch(function(e){ showErr(e.message); });
-}
-function allOff(){
-  var p=[];
-  CFG.downstairsZones.forEach(function(z){ lightsIn(z).forEach(function(d){ if(cap(d,'onoff')){ d.capabilitiesObj.onoff.value=false; p.push(setCap(d.id,'onoff',false)); } }); });
-  renderRooms(); toast('Lampen uit');
-  Promise.all(p).then(function(){ setTimeout(loadLive,800); }).catch(function(e){ showErr(e.message); });
-}
-
-/* ruimte-detail */
-var openRoom=null;
-function openRoomPanel(r){ openRoom=r; renderRoomPanel(); $('roomOv').className='ov show'; }
-function closeRoomPanel(){ openRoom=null; $('roomOv').className='ov'; }
-function renderRoomPanel(){
-  if(dragging) return;
-  var r=openRoom, ls=lightsIn(r.zone);
-  var h='<h2>'+r.name+'<span id="rpClose">Sluiten</span></h2>';
-  ls.forEach(function(d){
-    var on=cap(d,'onoff'), dim=cap(d,'dim');
-    h+='<div class="lamp'+(on?' on':'')+'" data-id="'+d.id+'"><div class="n">'+d.name+'</div>'+
-      (dim!==null? '<input type="range" min="1" max="100" value="'+Math.round((dim||0)*100)+'">' : '<div style="flex:1"></div>')+
-      '<div class="s"></div></div>';
-  });
-  $('roomPanel').innerHTML=h;
-  tap($('rpClose'),closeRoomPanel);
-  Array.prototype.forEach.call($('roomPanel').querySelectorAll('.lamp'),function(el){
-    var id=el.getAttribute('data-id'), d=S.devices[id];
-    tap(el.querySelector('.s'),function(){
-      var v=!cap(d,'onoff'); d.capabilitiesObj.onoff.value=v; renderRoomPanel(); renderRooms();
-      setCap(id,'onoff',v).catch(function(e){ showErr(e.message); });
+var COOK_CAPS=['light_mode','light_hue','light_saturation','light_temperature','dim','onoff'];
+function cookPrev(){ try{ var p=JSON.parse(store.get('kookPrev')||'null'); if(p && Date.now()-p.t < 8*3600000) return p; }catch(e){} return null; }
+function toggleCook(){
+  var prev=cookPrev();
+  if(!prev){
+    var snap={t:Date.now(),lamps:{}};
+    lightsIn(CFG.cookZone).forEach(function(d){ var st={}; COOK_CAPS.forEach(function(c){ var v=cap(d,c); if(v!==null) st[c]=v; }); snap.lamps[d.id]=st; });
+    store.set('kookPrev',JSON.stringify(snap)); renderActs();
+    triggerFlow(CFG.cookFlow,'Kookmodus aan');
+  } else {
+    store.set('kookPrev',''); renderActs(); toast('Keuken terug naar vorige stand');
+    var p=[];
+    each(prev.lamps,function(st,id){
+      if(st.onoff===false){ p.push(setCap(id,'onoff',false)); return; }
+      var ch=Promise.resolve();
+      if(st.light_mode==='color' && st.light_hue!==undefined){
+        ch=ch.then(function(){ return setCap(id,'light_hue',st.light_hue); })
+             .then(function(){ return st.light_saturation!==undefined ? setCap(id,'light_saturation',st.light_saturation) : null; });
+      } else if(st.light_temperature!==undefined){
+        ch=ch.then(function(){ return setCap(id,'light_temperature',st.light_temperature); });
+      }
+      if(st.dim!==undefined) ch=ch.then(function(){ return setCap(id,'dim',st.dim); });
+      p.push(ch.then(function(){ return setCap(id,'onoff',true); }));
     });
-    var rg=el.querySelector('input');
-    if(rg){
-      rg.addEventListener('touchstart',function(){dragging=true;});
-      rg.addEventListener('mousedown',function(){dragging=true;});
-      rg.addEventListener('change',function(){
-        dragging=false; var v=rg.value/100; d.capabilitiesObj.dim.value=v;
-        if(d.capabilitiesObj.onoff) d.capabilitiesObj.onoff.value=true;
-        setCap(id,'dim',v).then(function(){ renderRoomPanel(); renderRooms(); }).catch(function(e){ showErr(e.message); });
-      });
-    }
-  });
+    Promise.all(p).then(function(){ setTimeout(loadLive,800); }).catch(function(e){ showErr(e.message); });
+  }
 }
-var dragging=false;
-
-function renderMoods(){
-  var h='';
-  CFG.moods.forEach(function(m){ h+='<div class="mood" data-n="'+m.name+'"><i style="background:'+m.color+'"></i>'+m.name+'</div>'; });
-  $('moods').innerHTML=h;
-  Array.prototype.forEach.call($('moods').querySelectorAll('.mood'),function(el){
-    tap(el,function(){ setMood(el.getAttribute('data-n')); });
-  });
+function toggleGarland(){
+  var d=byName(CFG.garland), on=cap(d,'onoff');
+  if(has(d,'onoff')) d.capabilitiesObj.onoff.value=!on;
+  renderActs();
+  triggerFlow(on?CFG.garlandOffFlow:CFG.garlandOnFlow, on?'Lampjes voortuin uit':'Lampjes voortuin aan');
+}
+function renderActs(){
+  var p=cookPrev(), c=$('cook');
+  c.className='act cook'+(p?' on':'');
+  c.innerHTML='<span class="i">🍳</span>'+(p?'Kookmodus uit':'Kookmodus');
+  $('garland').className='act lamp'+(cap(byName(CFG.garland),'onoff')?' on':'');
 }
 
+/* ---------- aanwezigheid & temperatuur ---------- */
 function renderPeople(){
   var h='';
   S.users.filter(function(u){return u.role!=='guest' || u.present;}).forEach(function(u){
     var first=(u.name||'?').split(' ')[0];
-    h+='<div class="p'+(u.present?' home':'')+'"><div class="av">'+first.charAt(0)+'</div><div>'+first+'<small>'+(u.present?'Thuis':'Weg')+'</small></div></div>';
+    h+='<div class="p'+(u.present?' home':'')+'"><div class="av">'+esc(first.charAt(0))+'</div><div>'+esc(first)+'<small>'+(u.present?'Thuis':'Weg')+'</small></div></div>';
   });
   $('ppl').innerHTML=h;
 }
-
+var STALE_H=12;
+function capAge(d,c){ var o=d&&d.capabilitiesObj&&d.capabilitiesObj[c]; if(!o||!o.lastUpdated) return 0; return (Date.now()-new Date(o.lastUpdated).getTime())/3600000; }
+function lowBatt(d){ if(!d) return false; var a=cap(d,'alarm_battery'), b=cap(d,'measure_battery'); return a===true || (b!==null && b<15); }
 function fmtT(v){ return v===null||v===undefined ? '--' : (Math.round(v*10)/10).toFixed(1).replace('.',',')+'°'; }
 function renderTemps(){
-  $('tMain').innerHTML=fmtT(cap(byName(CFG.mainTemp),'measure_temperature'))+'<small>woonkamer</small>';
+  var md=byName(CFG.mainTemp), mOld=capAge(md,'measure_temperature')>STALE_H;
+  $('tMain').className='bigT'+(mOld?' old':'');
+  $('tMain').innerHTML=fmtT(cap(md,'measure_temperature'))+'<small>woonkamer'+(mOld?' ⚠︎ oud':'')+(lowBatt(md)?' 🔋':'')+'</small>';
   var h='';
   CFG.temps.forEach(function(t){ var d=byName(t[0]); if(!d) return;
-    h+='<div class="tp"><span>'+t[1]+'</span><b>'+fmtT(cap(d,'measure_temperature'))+'</b></div>'; });
+    var old=capAge(d,'measure_temperature')>STALE_H, lb=lowBatt(d);
+    h+='<div class="tp'+(old?' old':'')+'"><span>'+t[1]+'</span><b>'+(lb?'<span class="w">🔋</span>':'')+(old?'<span class="w">⚠︎</span>':'')+fmtT(cap(d,'measure_temperature'))+'</b></div>'; });
   $('temps').innerHTML=h;
 }
 
-function nf(v,dec){ return v===null||v===undefined ? '--' : Number(v).toFixed(dec).replace('.',','); }
+/* ---------- energie ---------- */
+var EZ={day:null,list:[]};
+function loadEZ(){
+  if(DEMO){ return; }
+  var d=new Date(), y=new Date(d.getTime()-86400000), t=new Date(d.getTime()+2*86400000);
+  function iso(x){ return x.getUTCFullYear()+'-'+pad(x.getUTCMonth()+1)+'-'+pad(x.getUTCDate()); }
+  var u='https://api.energyzero.nl/v1/energyprices?fromDate='+iso(y)+'T00:00:00.000Z&tillDate='+iso(t)+'T00:00:00.000Z&interval=4&usageType=1&inclBtw=true';
+  fetch(u).then(function(r){return r.json();}).then(function(j){
+    EZ.list=(j.Prices||[]).map(function(p){ return {t:new Date(p.readingDate).getTime(), p:p.price}; });
+    renderEnergy();
+  }).catch(function(){});
+}
+function priceSeries(pr){
+  // 12 uur vanaf nu; EnergyZero verschoven zodat het huidige uur gelijk is aan jouw prijs (incl. opslag/belasting)
+  var now=cap(pr,'meter_price_h0'), hs=new Date(); hs.setMinutes(0,0,0); var t0=hs.getTime(), out=[], i;
+  var ezNow=null; EZ.list.forEach(function(x){ if(x.t===t0) ezNow=x.p; });
+  if(ezNow!==null && now!==null){
+    var off=now-ezNow;
+    for(i=0;i<12;i++){ var v=null; EZ.list.forEach(function(x){ if(x.t===t0+i*3600000) v=x.p+off; }); out.push(v); }
+  } else {
+    for(i=0;i<12;i++) out.push(i<8? cap(pr,'meter_price_h'+i) : null);
+  }
+  return out;
+}
+function priceCls(v,lo,hi){ if(v===null||lo===null||hi===null) return 'mid'; var f=(v-lo)/Math.max(0.0001,hi-lo); return f<0.33?'lo':(f>0.66?'hi':'mid'); }
+var PCOL={lo:'#3fbf74',mid:'#d9b44a',hi:'#e0605a'};
+function hh(h){ return pad(h)+':00'; }
+function findMoney(kind){ // Power by the Hour kostenapparaat (stroom of gas), als je die hebt aangemaakt
+  var r=null;
+  each(S.devices,function(d){ var drv=d.driverId||''; if(drv.indexOf('powerhour')>=0 && has(d,'meter_money_this_day')){
+    var isGas = drv.indexOf('gas')>=0 || /gas/i.test(d.name);
+    if((kind==='gas')===isGas) r=d; } });
+  return r;
+}
 function renderEnergy(){
   var p1=byName(CFG.p1), pr=byName(CFG.prices);
   var w=cap(p1,'measure_power');
-  if(w!==null){
-    var ret=w<0;
-    $('pw').className='pw'+(ret?' ret':'');
-    $('pw').innerHTML=Math.abs(Math.round(w))+' W<small>'+(ret?'teruglevering':'verbruik')+'</small>';
+  if(w!==null){ var ret=w<0; $('pw').className='pw'+(ret?' ret':''); $('pw').innerHTML=Math.abs(Math.round(w))+' W<small>'+(ret?'teruglevering':'verbruik')+'</small>'; }
+  var lo=cap(pr,'meter_price_this_day_lowest'), hi=cap(pr,'meter_price_this_day_highest'), now=cap(pr,'meter_price_h0');
+  $('pNow').innerHTML= now===null?'':'Stroomprijs nu <span class="price '+priceCls(now,lo,hi)+'">€ '+nf(now,2)+'</span>';
+  var vals=priceSeries(pr), mx=0, mn=99, i;
+  vals.forEach(function(v){ if(v!==null){ mx=Math.max(mx,v); mn=Math.min(mn,v); } });
+  var lo2=Math.min(lo===null?mn:lo,mn), hi2=Math.max(hi===null?mx:hi,mx);
+  var base=Math.max(0,mn-(mx-mn)*0.6), hr=new Date().getHours(), h='';
+  for(i=0;i<vals.length;i++){
+    var v=vals[i], ht= v===null?3 : Math.round(8+70*(v-base)/Math.max(0.0001,mx-base));
+    h+='<div class="bar'+(i===0?' now':'')+'"><i style="height:'+ht+'px;background:'+(v===null?'#333':PCOL[priceCls(v,lo2,hi2)])+'"></i>'+(i===0?'nu':pad((hr+i)%24))+'</div>';
   }
-  var now=cap(pr,'meter_price_h0'), lo=cap(pr,'meter_price_this_day_lowest'), hi=cap(pr,'meter_price_this_day_highest');
-  var cls='mid'; if(now!==null&&lo!==null&&hi!==null){ var f=(now-lo)/Math.max(0.0001,hi-lo); cls=f<0.33?'lo':(f>0.66?'hi':'mid'); }
-  $('pNow').innerHTML= now===null?'--':'<span class="price '+cls+'">€ '+nf(now,2)+'</span>';
+  $('chart').innerHTML=h;
   var lh=cap(pr,'hour_next_8h_lowest'), lp=cap(pr,'meter_price_next_8h_lowest');
-  $('pLow').textContent= lh===null?'--': (lh<10?'0':'')+lh+':00 · € '+nf(lp,2);
-  $('eDay').textContent= nf(cap(p1,'meter_power.daily'),1)+' kWh';
-  $('gDay').textContent= nf(cap(p1,'meter_gas.daily'),2)+' m³';
-  var a=cap(byName(CFG.acW),'measure_power'), b=cap(byName(CFG.acS),'measure_power');
-  $('acW').textContent= a===null?'--':Math.round(a)+' W';
-  $('acS').textContent= b===null?'--':Math.round(b)+' W';
+  $('pLow').textContent= lh===null?'--': hh(lh)+' · € '+nf(lp,2);
+  var th=cap(pr,'hour_next_day_lowest'), tp=cap(pr,'meter_price_next_day_lowest');
+  $('pTom').textContent= (th===null||tp===null)? 'nog niet bekend' : hh(th)+' · € '+nf(tp,2);
+  var me=findMoney('power'), mg=findMoney('gas');
+  $('eDay').textContent= nf(cap(p1,'meter_power.daily'),1)+' kWh'+(me? ' · € '+nf(cap(me,'meter_money_this_day'),2):'');
+  $('gDay').textContent= nf(cap(p1,'meter_gas.daily'),2)+' m³'+(mg? ' · € '+nf(cap(mg,'meter_money_this_day'),2):'');
+  var ev=byName(CFG.ev);
+  if(ev){
+    var st=cap(ev,'evcharger_charging_state'), pw=cap(ev,'measure_power');
+    var txt={plugged_out:'niet aangesloten',plugged_in:'aangesloten',plugged_in_charging:'laden',plugged_in_paused:'gepauzeerd',plugged_in_discharging:'ontladen'}[st] || (cap(ev,'evcharger_charging')?'laden':(st||'--'));
+    $('ev').textContent= txt+(pw? ' · '+Math.round(pw).toLocaleString('nl-NL')+' W':'');
+  }
 }
+
+/* ---------- roborock ---------- */
+function renderRobot(){
+  var r=byName(CFG.robot); if(!r){ $('roboSt').innerHTML='<b>Niet gevonden</b>'; return; }
+  var cleaning=cap(r,'is_cleaning'), paused=cap(r,'pause_clean'), docked=cap(r,'dock'), bat=cap(r,'measure_battery'), chg=cap(r,'battery_charging_state');
+  var st= cleaning? (paused?'Gepauzeerd':'Bezig met poetsen') : (docked? (chg==='charging'?'In dock · laadt':'In dock') : 'Onderweg');
+  var warn=[];
+  if(cap(r,'alarm_stuck')) warn.push('vastgelopen');
+  if(cap(r,'alarm_problem')) warn.push('probleem');
+  if(cap(r,'alarm_water_box_empty')) warn.push('waterreservoir leeg');
+  $('roboSt').innerHTML='<b>'+st+'</b><span>Accu '+(bat===null?'--':bat+'%')+'</span>'+(warn.length?' · <span class="warn">⚠︎ '+warn.join(', ')+'</span>':'');
+}
+function robo(card,args,msg){
+  var r=byName(CFG.robot); if(!r){ showErr('Roborock niet gevonden'); return Promise.resolve(); }
+  if(msg) toast(msg);
+  return runCard(r.id,card,args).then(function(){ setTimeout(loadLive,2500); }).catch(function(e){ showErr('Roborock: '+e.message); });
+}
+
+/* ---------- muziek ---------- */
+var PLAY='<svg width="22" height="22" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>';
+var PAUSE='<svg width="22" height="22" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+var PREV='<svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 5h2v14H6zM9.5 12 19 5v14z"/></svg>';
+var NEXT='<svg width="16" height="16" viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM5 5l9.5 7L5 19z"/></svg>';
+function artUrl(d){ var a=cap(d,'artwork_url_local'); if(a) return a; return img(d,'albumart'); }
+function trackOf(d){
+  var t=cap(d,'speaker_track'), a=cap(d,'speaker_artist');
+  if(!t || t==='Homey' || t==='Idle') return {t: cap(d,'speaker_playing')? 'Speelt' : 'Niets aan het spelen', a:''};
+  return {t:t, a:a||cap(d,'speaker_album')||''};
+}
+function renderMusic(){
+  var d=musicDev();
+  if(!d){ $('mText').innerHTML='<b>Sonos keuken niet gevonden</b>'; return; }
+  var tr=trackOf(d), pl=cap(d,'speaker_playing'), u=artUrl(d);
+  $('mText').innerHTML='<b>'+esc(tr.t)+'</b><span>'+esc(tr.a)+'</span>';
+  $('mArt').style.backgroundImage= (u && pl!==false && tr.a) ? 'url("'+u+'")' : '';
+  $('mArt').textContent= (u && tr.a) ? '' : '♪';
+  $('mPlay').innerHTML= pl? PAUSE : PLAY;
+}
+function spk(d,act){
+  if(!d) return;
+  var p;
+  if(act==='play'){ var v=!cap(d,'speaker_playing'); d.capabilitiesObj.speaker_playing.value=v; renderMusic(); if(cur===2) renderPlayers(); p=setCap(d.id,'speaker_playing',v); }
+  else p=setCap(d.id, act==='next'?'speaker_next':'speaker_prev', true);
+  p.then(function(){ setTimeout(loadLive,1500); }).catch(function(e){ showErr(d.name+': '+e.message); });
+}
+
+/* scherm 2 */
+var target=null, sliding=false;
+function renderPlayers(){
+  if(sliding) return;
+  var h='';
+  speakers().forEach(function(d){
+    var tr=trackOf(d), pl=cap(d,'speaker_playing'), u=artUrl(d), vol=cap(d,'volume_set');
+    h+='<div class="pl'+(pl?' playing':'')+'" data-id="'+d.id+'"><div class="top">'+
+      '<div class="art" style="'+(u&&tr.a?'background-image:url(&quot;'+u+'&quot;)':'')+'">'+(u&&tr.a?'':'♪')+'</div>'+
+      '<div class="mt"><div class="nm">'+esc(d.name)+(pl?' · speelt':'')+'</div><b>'+esc(tr.t)+'</b><span>'+esc(tr.a)+'</span></div></div>'+
+      '<div class="row2">'+(has(d,'speaker_prev')?'<div class="ctl" data-a="prev">'+PREV+'</div>':'')+
+      '<div class="ctl big" data-a="play">'+(pl?PAUSE:PLAY)+'</div>'+
+      (has(d,'speaker_next')?'<div class="ctl" data-a="next">'+NEXT+'</div>':'')+
+      (vol!==null?'<input type="range" min="0" max="100" value="'+Math.round(vol*100)+'">':'')+'</div></div>';
+  });
+  $('players').innerHTML=h;
+  Array.prototype.forEach.call($('players').querySelectorAll('.pl'),function(el){
+    var d=S.devices[el.getAttribute('data-id')];
+    Array.prototype.forEach.call(el.querySelectorAll('.ctl'),function(b){ tap(b,function(){ spk(d,b.getAttribute('data-a')); }); });
+    var rg=el.querySelector('input');
+    if(rg){
+      rg.addEventListener('touchstart',function(){sliding=true;}); rg.addEventListener('mousedown',function(){sliding=true;});
+      rg.addEventListener('change',function(){ sliding=false; var v=rg.value/100; d.capabilitiesObj.volume_set.value=v;
+        setCap(d.id,'volume_set',v).catch(function(e){ showErr(d.name+': '+e.message); }); });
+    }
+  });
+  renderTargets();
+}
+function sonosList(){ return speakers().filter(function(d){ return (d.driverId||'').indexOf('com.sonos')>=0; }); }
+function renderTargets(){
+  var list=sonosList(); if(!target && list.length){ var m=musicDev(); target=m?m.id:list[0].id; }
+  var h=''; list.forEach(function(d){ h+='<div class="chip'+(d.id===target?' sel':'')+'" data-id="'+d.id+'">'+esc(d.name)+'</div>'; });
+  $('targets').innerHTML=h;
+  Array.prototype.forEach.call($('targets').querySelectorAll('.chip'),function(el){ tap(el,function(){ target=el.getAttribute('data-id'); renderTargets(); }); });
+}
+function loadFavs(){
+  var d=musicDev(); if(!d) return;
+  var uri='homey:device:'+d.id;
+  api('GET','manager/flow/flowcardaction/'+uri+'/'+uri+':cloud_play_sonos_favorite/autocomplete?name=favorite&query=').then(function(list){
+    S.favs=list||[]; renderFavs();
+  }).catch(function(){});
+}
+function renderFavs(){
+  var h='';
+  S.favs.forEach(function(f,i){
+    h+='<div class="fav" data-i="'+i+'"><div class="art" style="'+(f.image?'background-image:url(&quot;'+esc(f.image)+'&quot;)':'')+'">'+(f.image?'':'♪')+'</div>'+
+       '<div><b>'+esc(f.name)+'</b><span>'+esc(f.description||'')+'</span></div></div>';
+  });
+  $('favs').innerHTML=h || '<div style="color:var(--mut);padding:4px">Geen Sonos-favorieten gevonden</div>';
+  Array.prototype.forEach.call($('favs').querySelectorAll('.fav'),function(el){
+    tap(el,function(){
+      var f=S.favs[+el.getAttribute('data-i')], d=S.devices[target]; if(!d) return;
+      toast(f.name+' op '+d.name);
+      runCard(d.id,'cloud_play_sonos_favorite',{favorite:f}).then(function(){ setTimeout(loadLive,2500); }).catch(function(e){ showErr(e.message); });
+    });
+  });
+}
+
+/* ---------- schermen wisselen ---------- */
+var cur=1;
+function go(n){
+  cur=n; $('scr1').className='screen'+(n===1?' show':''); $('scr2').className='screen'+(n===2?' show':'');
+  $('d1').className=n===1?'on':''; $('d2').className=n===2?'on':'';
+  if(n===2){ renderPlayers(); if(!S.favs.length) loadFavs(); }
+}
+(function(){
+  var sx=0, sy=0;
+  document.addEventListener('touchstart',function(e){ var t=e.touches[0]; sx=t.clientX; sy=t.clientY; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(sliding) return;
+    var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
+    if(Math.abs(dx)>90 && Math.abs(dx)>2*Math.abs(dy)){ if(dx<0 && cur===1) go(2); else if(dx>0 && cur===2) go(1); }
+  },{passive:true});
+})();
 
 /* ---------- klok & weer ---------- */
 var DAYS=['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
 var MON=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
-function pad(n){ return (n<10?'0':'')+n; }
-function tick(){
-  var d=new Date();
-  $('clock').textContent=pad(d.getHours())+':'+pad(d.getMinutes());
-  $('date').textContent=DAYS[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()];
-}
+function tick(){ var d=new Date(); $('clock').textContent=pad(d.getHours())+':'+pad(d.getMinutes()); $('date').textContent=DAYS[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]; }
 function wxInfo(c){
   if(c===0) return ['☀️','Zonnig']; if(c<=2) return ['🌤','Licht bewolkt']; if(c===3) return ['☁️','Bewolkt'];
   if(c<=48) return ['🌫','Mist']; if(c<=57) return ['🌦','Motregen']; if(c<=67) return ['🌧','Regen'];
@@ -449,48 +658,34 @@ function renderWeather(w){
   $('wxIc').textContent=i[0]; $('wxT').textContent=Math.round(w.current.temperature_2m)+'°';
   $('wxD').textContent=i[1]+' · wind '+Math.round(w.current.wind_speed_10m)+' km/u';
   var h='';
-  for(var k=1;k<4;k++){
-    var dt=new Date(w.daily.time[k]+'T12:00:00');
-    h+='<div>'+DAYS[dt.getDay()].substr(0,2)+'<b>'+wxInfo(w.daily.weather_code[k])[0]+' '+Math.round(w.daily.temperature_2m_max[k])+'°</b></div>';
-  }
+  for(var k=1;k<4;k++){ var dt=new Date(w.daily.time[k]+'T12:00:00');
+    h+='<div>'+DAYS[dt.getDay()].substr(0,2)+'<b>'+wxInfo(w.daily.weather_code[k])[0]+' '+Math.round(w.daily.temperature_2m_max[k])+'°</b></div>'; }
   $('fc').innerHTML=h;
 }
 
 /* ---------- deurbel ---------- */
-function camUrl(){
-  var d=byName(CFG.doorbellDevice); if(!d||!d.images||!d.images.length) return null;
-  var im=d.images[0].imageObj; return im ? HOST+im.url : null;
-}
-function camLoop(img, getDelay){
-  // laad volgende beeld pas als het vorige binnen is
+function camUrl(){ var d=byName(CFG.doorbellDevice); if(!d||!d.images||!d.images.length) return null; var im=d.images[0].imageObj; return im ? HOST+im.url : null; }
+function camLoop(el, getDelay){
   function next(){
-    var u=camUrl();
-    if(DEMO) u=demoCam();
+    var u= DEMO? demoCam() : camUrl();
     if(!u){ setTimeout(next,2000); return; }
     var n=new Image();
-    n.onload=function(){ img.src=n.src; setTimeout(next,getDelay()); };
+    n.onload=function(){ el.src=n.src; setTimeout(next,getDelay()); };
     n.onerror=function(){ setTimeout(next,3000); };
     n.src= DEMO ? u : u+(u.indexOf('?')<0?'?':'&')+'t='+Date.now();
   }
   next();
 }
 var doorOpen=false, doorTimer=null;
-function showDoor(){
-  doorOpen=true; $('door').className='ov door show';
-  clearTimeout(doorTimer); doorTimer=setTimeout(hideDoor, CFG.doorShowSec*1000);
-}
+function showDoor(){ doorOpen=true; $('door').className='ov door show'; clearTimeout(doorTimer); doorTimer=setTimeout(hideDoor, CFG.doorShowSec*1000); }
 function hideDoor(){ doorOpen=false; $('door').className='ov door'; clearTimeout(doorTimer); }
 function varId(name){ var r=null; each(S.vars,function(v,k){ if(v.name===name) r=k; }); return r; }
 var doorBusy=false;
 function pollDoorbell(){
-  var id=varId(CFG.doorbellVar);
-  if(!id||doorBusy){ return; }
+  var id=varId(CFG.doorbellVar); if(!id||doorBusy) return;
   doorBusy=true;
   api('GET','manager/logic/variable/'+id).then(function(v){
-    if(v && v.value===true){
-      showDoor();
-      return api('PUT','manager/logic/variable/'+id,{variable:{value:false}});
-    }
+    if(v && v.value===true){ go(1); showDoor(); return api('PUT','manager/logic/variable/'+id,{variable:{value:false}}); }
   }).catch(function(){}).then(function(){ doorBusy=false; });
 }
 
@@ -498,17 +693,30 @@ function pollDoorbell(){
 function openSetup(){ $('sHost').value=HOST; $('sKey').value=''; $('setupOv').className='ov show'; }
 tap($('sSave'),function(){
   var h=$('sHost').value.trim().replace(/\/+$/,''), k=$('sKey').value.trim();
-  if(h){ store.set('homeyHost',h); HOST=h; }
-  if(k){ store.set('homeyKey',k); KEY=k; }
-  $('setupOv').className='ov';
-  start();
+  if(h){ store.set('homeyHost',h); HOST=h; } if(k){ store.set('homeyKey',k); KEY=k; }
+  $('setupOv').className='ov'; start();
 });
 (function(){ var t=null, el=$('clockCard');
-  function down(){ t=setTimeout(openSetup,2000); }
-  function up(){ clearTimeout(t); }
-  el.addEventListener('touchstart',down); el.addEventListener('touchend',up);
-  el.addEventListener('mousedown',down); el.addEventListener('mouseup',up);
+  function down(){ t=setTimeout(openSetup,2000); } function up(){ clearTimeout(t); }
+  el.addEventListener('touchstart',down); el.addEventListener('touchend',up); el.addEventListener('mousedown',down); el.addEventListener('mouseup',up);
 })();
+
+/* ---------- knoppen ---------- */
+tap($('cook'),toggleCook);
+tap($('night'),function(){ store.set('kookPrev',''); renderActs(); triggerFlow(CFG.nightFlow,'Nachtstand'); });
+tap($('alloff'),function(){ store.set('kookPrev',''); renderActs(); triggerFlow(CFG.allOffFlow,'Alle lampen uit'); });
+tap($('garland'),toggleGarland);
+Array.prototype.forEach.call(document.querySelectorAll('[data-mood]'),function(el){ tap(el,function(){ setMood(el.getAttribute('data-mood')); }); });
+tap($('roboAll'),function(){ robo('clean_all',{},'Roborock: hele woning'); });
+tap($('roboKitchen'),function(){ robo('clean_rooms_with_config',{rooms:CFG.robotKitchenRooms,repeat:1,clean_mode:'1',suction_power:'102',scrub_intensity:'201',mop_route:'300'},'Roborock: keuken stofzuigen + dweilen'); });
+tap($('roboStop'),function(){ robo('stop_clean',{},'Roborock stopt').then(function(){ return robo('dock',{}); }); });
+tap($('mPrev'),function(){ spk(musicDev(),'prev'); });
+tap($('mNext'),function(){ spk(musicDev(),'next'); });
+tap($('mPlay'),function(){ spk(musicDev(),'play'); });
+tap($('mArt'),function(){ go(2); });
+tap($('mText'),function(){ go(2); });
+tap($('back'),function(){ go(1); });
+tap($('door'),hideDoor);
 
 /* ---------- start ---------- */
 var started=false;
@@ -521,44 +729,41 @@ function start(){
   setInterval(pollDoorbell, 1500);
   camLoop($('camImg'), function(){ return doorOpen ? 5000 : 1000; });
   camLoop($('doorImg'), function(){ return doorOpen ? 300 : 4000; });
+  loadEZ(); setInterval(loadEZ, 30*60*1000);
 }
-
-tap($('cook'),function(){ triggerFlow(CFG.cookFlow); });
-tap($('alloff'),allOff);
-tap($('door'),hideDoor);
-tap($('roomOv'),function(e){ if(e.target===$('roomOv')) closeRoomPanel(); });
-$('roomPanel').addEventListener('click',function(e){ e.stopPropagation(); });
-
 tick(); setInterval(tick,10000);
-renderMoods();
 loadWeather(); setInterval(loadWeather, 30*60*1000);
 start();
-
-/* nacht: herlaad de pagina eens per dag om 04:00 (geheugen vrijmaken) */
 setInterval(function(){ var d=new Date(); if(d.getHours()===4 && d.getMinutes()===0) location.reload(); }, 60000);
 
 /* ---------- demo-modus (?demo=1) ---------- */
 function demoApi(method,path){
   if(method!=='GET') return null;
-  var zones={z1:{name:'Woonkamer'},z2:{name:'Keuken'},z3:{name:'Entree'}};
-  if(path.indexOf('zones')>=0) return zones;
-  if(path.indexOf('moods')>=0){ var m={}; CFG.moods.forEach(function(x,i){ m['m'+i]={name:x.name}; }); return m; }
-  if(path.indexOf('advancedflow')>=0) return {f1:{name:CFG.cookFlow}};
+  if(path.indexOf('zones')>=0) return {z1:{name:'Woonkamer'},z2:{name:'Keuken'},z3:{name:'Entree'}};
+  if(path.indexOf('autocomplete')>=0) return [{id:'21',name:'NPO Radio 2',description:'TuneIn Station'},{id:'13',name:'Omroep Zeeland',description:'TuneIn-station'},{id:'23',name:'Sublime FM',description:'TuneIn Station'},{id:'17',name:'Top Tracks',description:'Spotify-afspeellijst'},{id:'30',name:'Mijn Mix',description:'YouTube Music'}];
+  if(path.indexOf('moods')>=0) return {m1:{name:'Verguld'},m2:{name:'Oosters'}};
+  if(path.indexOf('advancedflow')>=0) return {f1:{name:CFG.cookFlow},f2:{name:CFG.nightFlow},f3:{name:CFG.allOffFlow},f4:{name:CFG.garlandOnFlow},f5:{name:CFG.garlandOffFlow}};
   if(path.indexOf('logic/variable/')>=0 && path.split('/').length>3) return {value:false};
   if(path.indexOf('logic')>=0) return {v1:{name:'Deurbel',value:false}};
   if(path.indexOf('users')>=0) return {a:{name:'Jessica Van Houte',present:false,role:'user'},b:{name:'Dennis Verstraate',present:true,role:'owner'}};
   if(path.indexOf('devices')>=0){
     var D={}, n=0;
-    function L(name,z,on,dim){ D['d'+(++n)]={id:'d'+n,name:name,zone:z,'class':'light',capabilitiesObj:{onoff:{value:on},dim:{value:dim}}}; }
-    function C(name,obj){ var c={}; each(obj,function(v,k){c[k]={value:v};}); D['d'+(++n)]={id:'d'+n,name:name,zone:'x','class':'sensor',capabilitiesObj:c}; }
-    L('Lichtstaaf woonkamer 1','z1',true,.6); L('Lichtstaaf woonkamer 2','z1',true,.6); L('Schemerlamp','z1',false,.4); L('Spot kachel','z1',true,.3);
-    L('Lamp Tylko kast','z1',false,.5); L('Lamp keuken 1','z2',false,1); L('Lamp keuken 2','z2',false,1); L('Lamp keuken 3','z2',false,1); L('Hal','z3',false,.5);
-    C('Temp Woonkamer',{measure_temperature:20.4}); C('Temp Keuken',{measure_temperature:19.8}); C('Temp Entree',{measure_temperature:17.2});
+    function C(name,obj,extra){ var c={}; each(obj,function(v,k){c[k]={value:v};}); var id='d'+(++n); D[id]={id:id,name:name,zone:'x','class':'sensor',capabilitiesObj:c}; if(extra) each(extra,function(v,k){D[id][k]=v;}); return D[id]; }
+    C('Lamp keuken 1',{onoff:false,dim:1},{zone:'z2','class':'light'});
+    C('Temp Woonkamer',{measure_temperature:20.4}); C('Temp Keuken',{measure_temperature:19.8});
+    var e=C('Temp Entree',{measure_temperature:26.9}); e.capabilitiesObj.measure_temperature.lastUpdated=Date.now()-200*3600000;
     C('Temp Slaapkamer',{measure_temperature:16.9}); C('Temp Kantoor',{measure_temperature:19.1}); C('Temp Wasruimte',{measure_temperature:15.3});
-    C('Temp Garage',{measure_temperature:8.4}); C('Temp Domein Jes',{measure_temperature:18.6});
+    C('Temp Garage',{measure_temperature:8.4,measure_battery:9}); C('Temp Domein Jes',{measure_temperature:18.6});
     C('P1 Meter',{measure_power:-639,'meter_power.daily':16.3,'meter_gas.daily':0.93});
-    C('Energieprijzen',{meter_price_h0:0.41,meter_price_this_day_lowest:0.39,meter_price_this_day_highest:0.56,hour_next_8h_lowest:12,meter_price_next_8h_lowest:0.41});
-    C('Airco woonkamer',{measure_power:3}); C('Airco slaapkamer',{measure_power:0});
+    C('Energieprijzen',{meter_price_h0:0.41,meter_price_h1:0.42,meter_price_h2:0.47,meter_price_h3:0.51,meter_price_h4:0.56,meter_price_h5:0.54,meter_price_h6:0.51,meter_price_h7:0.49,meter_price_this_day_lowest:0.39,meter_price_this_day_highest:0.56,hour_next_8h_lowest:12,meter_price_next_8h_lowest:0.41,hour_next_day_lowest:3,meter_price_next_day_lowest:0.29});
+    C('Stroom kosten',{meter_money_this_day:4.12},{driverId:'homey:app:com.gruijter.powerhour:power'});
+    C('Gas kosten',{meter_money_this_day:1.18},{driverId:'homey:app:com.gruijter.powerhour:gas'});
+    C('Laadpaal',{measure_power:7400,evcharger_charging:true,evcharger_charging_state:'plugged_in_charging'});
+    C('Lampjes voortuin',{onoff:true});
+    C('Jacqueline',{is_cleaning:false,dock:true,measure_battery:100,battery_charging_state:'charging',alarm_water_box_empty:true});
+    var sp=[['Keuken','com.sonos',true,'Mr. Brightside','The Killers','z2'],['Sonos Woonkamer','com.sonos',false,'Homey',null,'z1'],['Sonos Badkamer','com.sonos',false,null,null,'x'],
+            ['Chromecast woonkamer','chromecast',false,'Idle','','x'],['Chromecast veranda','chromecast',false,'YouTube','YouTube','x'],['Speaker garage','chromecast',true,'Er is maar één NPO Radio 2','NPO Radio 2','x'],['Home pod','homepod',false,'NPO Radio 2','AirMusic','x']];
+    sp.forEach(function(s){ C(s[0],{speaker_playing:s[2],speaker_track:s[3],speaker_artist:s[4],speaker_next:null,speaker_prev:null,volume_set:0.3},{'class':'speaker',driverId:'homey:app:'+s[1]+':x',zone:s[5]}); });
     return D;
   }
   return {};
