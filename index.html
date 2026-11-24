@@ -116,13 +116,41 @@
   .back{background:var(--card);border-radius:12px;padding:10px 16px;font-size:16px;font-weight:600;}
   .s2head h1{font-size:24px;margin:0 0 0 16px;font-weight:600;}
   .players{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:12px;}
+  .players.small{grid-template-columns:repeat(4,minmax(0,1fr));grid-gap:8px;margin-top:10px;}
+  .players.small .pl{padding:8px 10px;}
+  .players.small .art{width:38px;height:38px;font-size:16px;}
+  .players.small .mt b{font-size:13px;} .players.small .mt span{font-size:11px;}
+  .players.small .row2{margin-top:6px;}
+  .players.small .ctl{width:30px;height:30px;} .players.small .ctl.big{width:34px;height:34px;}
+  .players.small .ctl svg{width:13px;height:13px;}
+  .grp{display:flex;flex-wrap:wrap;align-items:center;margin-top:10px;font-size:12px;color:var(--mut);}
+  .grp .chip{padding:5px 10px;font-size:12px;margin:3px 4px 0 0;}
+  .grp .chip.in{background:#2f6d4a;color:#d8ffe6;}
+  .mvol{display:flex;align-items:center;margin-top:8px;}
+  .mvol span{font-size:13px;color:var(--mut);width:28px;}
+  .mvol input{flex:1;height:26px;}
+  .s3{height:100%;padding:12px 14px;display:flex;flex-direction:column;}
+  .s3 .body{flex:1;min-height:0;display:flex;margin-top:4px;}
+  .mapc{background:#fff;border-radius:16px;flex:0 0 470px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+  .mapc img{max-width:100%;max-height:100%;}
+  .mapc .tag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;padding:3px 8px;border-radius:8px;font-size:12px;}
+  .rside{flex:1;margin-left:12px;display:flex;flex-direction:column;min-width:0;}
+  .rside .card + .card{margin-top:10px;}
+  .opts{display:flex;flex-wrap:wrap;margin:-3px;}
+  .opts .chip{margin:3px;padding:8px 12px;font-size:13px;}
+  .olbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:8px 0 4px;}
+  .rgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:8px;}
+  .rgrid .act{height:44px;font-size:13px;}
+  .rstat{display:grid;grid-template-columns:repeat(4,1fr);grid-gap:6px;font-size:12px;color:var(--mut);}
+  .rstat b{display:block;font-size:18px;color:var(--txt);font-weight:500;}
+  .door .live{position:absolute;right:24px;bottom:20px;background:#c0392b;color:#fff;padding:4px 10px;border-radius:8px;font-size:13px;font-weight:600;display:none;}
   .pl{background:var(--card);border-radius:16px;padding:12px;}
   .pl .top{display:flex;align-items:center;}
   .pl .art{width:56px;height:56px;}
   .pl .nm{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;}
   .pl.playing .nm{color:var(--ok);}
   .pl .row2{display:flex;align-items:center;margin-top:10px;}
-  .pl .row2 input{flex:1;margin-left:8px;height:30px;}
+  .pl .row2 input{flex:1;margin-left:8px;height:30px;min-width:0;width:40px;}
   .pl .ctl{width:38px;height:38px;margin-left:0;margin-right:6px;}
   .pl .ctl.big{width:42px;height:42px;}
   .favs{background:var(--card);border-radius:16px;padding:12px 14px;margin-top:12px;}
@@ -182,8 +210,8 @@
   <!-- midden -->
   <div class="col">
     <div class="card">
-      <div class="lbl">Voordeur</div>
-      <div class="cam"><img id="camImg" alt=""><div class="tag">Live</div></div>
+      <div class="lbl"><span>Voordeur</span><span>tik voor live ›</span></div>
+      <div class="cam" id="camBox"><img id="camImg" alt=""><div class="tag">Live</div></div>
     </div>
     <div class="card">
       <div class="lbl">Verlichting</div>
@@ -197,7 +225,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="lbl">Roborock</div>
+      <div class="lbl" id="roboHead"><span>Roborock</span><span>meer ›</span></div>
       <div class="robo"><div class="st" id="roboSt"><b>--</b><span></span></div></div>
       <div class="rbtns">
         <div class="act" id="roboAll"><span class="i">🧹</span>Hele woning</div>
@@ -214,6 +242,7 @@
         <div class="ctl big" id="mPlay"></div>
         <div class="ctl" id="mNext"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM5 5l9.5 7L5 19z"/></svg></div>
       </div>
+      <div class="mvol"><span>🔈</span><input type="range" id="mVol" min="0" max="60" value="10"><span style="text-align:right">🔊</span></div>
     </div>
   </div>
 
@@ -239,6 +268,7 @@
 <div class="screen" id="scr2"><div class="s2">
   <div class="s2head"><div class="back" id="back">‹ Thuis</div><h1>Muziek</h1></div>
   <div class="players" id="players"></div>
+  <div class="players small" id="players2"></div>
   <div class="favs">
     <div class="lbl"><span>Favorieten afspelen op</span></div>
     <div class="chips" id="targets"></div>
@@ -246,11 +276,43 @@
   </div>
 </div></div>
 
-<div class="dots"><i id="d1" class="on"></i><i id="d2"></i></div>
+<!-- ================= SCHERM 3: ROBOROCK ================= -->
+<div class="screen" id="scr3"><div class="s3">
+  <div class="s2head"><div class="back" id="back3">‹ Thuis</div><h1>Roborock · Jacqueline</h1></div>
+  <div class="body">
+    <div class="mapc"><img id="rMap" alt=""><div class="tag">Kaart</div></div>
+    <div class="rside">
+      <div class="card">
+        <div class="robo"><div class="st" id="roboSt2"><b>--</b><span></span></div></div>
+        <div class="rstat" style="margin-top:8px" id="rStat"></div>
+      </div>
+      <div class="card">
+        <div class="lbl">Poetsen</div>
+        <div class="olbl">Waar</div><div class="opts" id="oRooms"></div>
+        <div class="olbl">Modus</div><div class="opts" id="oMode"></div>
+        <div class="olbl">Zuigkracht</div><div class="opts" id="oSuck"></div>
+        <div class="olbl">Water</div><div class="opts" id="oWater"></div>
+        <div class="act cook" id="rGo" style="margin-top:10px;height:48px">▶ Start poetsen</div>
+      </div>
+      <div class="card">
+        <div class="rgrid">
+          <div class="act" id="rPause">❚❚&nbsp; Pauze / verder</div>
+          <div class="act off" id="rDock">⌂ Naar dock</div>
+          <div class="act" id="rLocate">📍 Zoek robot</div>
+          <div class="act" id="rRepeat">↻ Laatste herhalen</div>
+          <div class="act" id="rEmpty">🗑 Stofzak legen</div>
+          <div class="act" id="rWash">💧 Dweil wassen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div class="dots"><i id="d1" class="on"></i><i id="d2"></i><i id="d3"></i></div>
 
 <!-- deurbel groot -->
 <div class="ov door" id="door"><img id="doorImg" alt="">
-  <div class="bar2"><div>🔔 Er staat iemand voor de deur</div><div class="x">Sluiten</div></div>
+  <div class="bar2"><div id="doorTitle">🔔 Er staat iemand voor de deur</div><div class="x">Sluiten</div></div><div class="live" id="liveTag">● LIVE</div>
 </div>
 
 <!-- instellingen -->
@@ -260,6 +322,8 @@
   <input id="sHost" autocapitalize="off" autocorrect="off" spellcheck="false">
   <div>API-sleutel</div>
   <input id="sKey" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Plak hier de sleutel uit Homey">
+  <div>Wachtwoord deurbel (admin), voor het live beeld</div>
+  <input id="sRl" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Leeg laten = niet wijzigen">
   <div class="btn" id="sSave">Opslaan</div>
   <p style="color:var(--mut);font-size:13px;margin-top:16px">De sleutel wordt alleen op deze iPad bewaard. Instellingen openen: houd de klok 2 seconden ingedrukt.</p>
 </div></div>
@@ -293,7 +357,8 @@ var CFG = {
   robot: 'Jacqueline', robotKitchenRooms: 'keuken',
   musicZone: 'Keuken',
   motion: 'Beweging keuken',
-  sleepMin: 5,
+  doorbellIp: '192.168.1.200',
+  sleepMin: 6,
   pollMs: 8000
 };
 
@@ -533,8 +598,39 @@ function renderRobot(){
   if(cap(r,'alarm_stuck')) warn.push('vastgelopen');
   if(cap(r,'alarm_problem')) warn.push('probleem');
   if(cap(r,'alarm_water_box_empty')) warn.push('waterreservoir leeg');
-  $('roboSt').innerHTML='<b>'+st+'</b><span>Accu '+(bat===null?'--':bat+'%')+'</span>'+(warn.length?' · <span class="warn">⚠︎ '+warn.join(', ')+'</span>':'');
+  var sh='<b>'+st+'</b><span>Accu '+(bat===null?'--':bat+'%')+'</span>'+(warn.length?' · <span class="warn">⚠︎ '+warn.join(', ')+'</span>':'');
+  $('roboSt').innerHTML=sh; $('roboSt2').innerHTML=sh;
+  $('rStat').innerHTML='<div>Accu<b>'+(bat===null?'--':bat+'%')+'</b></div><div>Laatste beurt<b>'+nf(cap(r,'clean_area'),0)+' m²</b></div>'+
+    '<div>Duur<b>'+fmtMin(cap(r,'clean_time'))+'</b></div><div>Dweil<b>'+(cap(r,'mop_attached')?'erop':'eraf')+'</b></div>';
 }
+var RO={rooms:'all',mode:'1',suck:'102',water:'201'};
+var MODES=[['0','Stofzuigen'],['1','Zuigen + dweilen'],['2','Dweilen']];
+var SUCKS=[['101','Stil'],['102','Normaal'],['103','Turbo'],['104','Max']];
+var WATERS=[['200','Uit'],['201','Mild'],['202','Gemiddeld'],['203','Intens']];
+function chips(id,list,key){
+  var h=''; list.forEach(function(o){ h+='<div class="chip'+(RO[key]===o[0]?' sel':'')+'" data-v="'+esc(o[0])+'">'+esc(o[1])+'</div>'; });
+  $(id).innerHTML=h;
+  Array.prototype.forEach.call($(id).querySelectorAll('.chip'),function(el){ tap(el,function(){ RO[key]=el.getAttribute('data-v'); renderRoboOpts(); }); });
+}
+function renderRoboOpts(){
+  var r=byName(CFG.robot), rooms=[['all','Hele woning']];
+  var o=r&&r.capabilitiesObj&&r.capabilitiesObj.clean_room_pick;
+  ((o&&o.values)||[]).forEach(function(v){ rooms.push([v.title, v.title.charAt(0).toUpperCase()+v.title.slice(1)]); });
+  chips('oRooms',rooms,'rooms'); chips('oMode',MODES,'mode'); chips('oSuck',SUCKS,'suck'); chips('oWater',WATERS,'water');
+}
+function refreshMap(){
+  var r=byName(CFG.robot), u=img(r,'map');
+  if(DEMO) u='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="460"><rect x="20" y="20" width="360" height="420" fill="#f47a55"/><text x="200" y="240" font-size="22" text-anchor="middle" fill="#fff">kaart</text></svg>');
+  if(u) $('rMap').src= DEMO ? u : u+'&t='+Date.now();
+}
+function startClean(){
+  if(RO.rooms==='all'){
+    robo('set_clean_mode',{value:RO.mode}).then(function(){ return robo('set_suction_power',{value:RO.suck}); })
+      .then(function(){ return robo('set_scrub_intensity',{value:RO.water}); })
+      .then(function(){ return robo('clean_all',{},'Roborock: hele woning'); });
+  } else robo('clean_rooms_with_config',{rooms:RO.rooms,repeat:1,clean_mode:RO.mode,suction_power:RO.suck,scrub_intensity:RO.water,mop_route:'300'},'Roborock: '+RO.rooms);
+}
+function fmtMin(v){ return v===null||v===undefined?'--':Math.round(v*60)+' min'; }
 function robo(card,args,msg){
   var r=byName(CFG.robot); if(!r){ showErr('Roborock niet gevonden'); return Promise.resolve(); }
   if(msg) toast(msg);
@@ -550,6 +646,8 @@ function artUrl(d){ var a=cap(d,'artwork_url_local'); if(a) return a; return img
 function trackOf(d){
   var t=cap(d,'speaker_track'), a=cap(d,'speaker_artist');
   if(!t || t==='Homey' || t==='Idle') return {t: cap(d,'speaker_playing')? 'Speelt' : 'Niets aan het spelen', a:''};
+  if((!a || a==='Homey') && t.indexOf(' - ')>0){ var p=t.split(' - '); return {t:p.slice(1).join(' - '), a:p[0]}; }
+  if(a==='Homey') a='';
   return {t:t, a:a||cap(d,'speaker_album')||''};
 }
 function renderMusic(){
@@ -560,7 +658,14 @@ function renderMusic(){
   $('mArt').style.backgroundImage= (u && pl!==false && tr.a) ? 'url("'+u+'")' : '';
   $('mArt').textContent= (u && tr.a) ? '' : '♪';
   $('mPlay').innerHTML= pl? PAUSE : PLAY;
+  if(!mSliding && cap(d,'volume_set')!==null) $('mVol').value=Math.round(cap(d,'volume_set')*100);
 }
+var mSliding=false;
+(function(){ var rg=$('mVol');
+  rg.addEventListener('touchstart',function(){ mSliding=true; },{passive:true}); rg.addEventListener('mousedown',function(){ mSliding=true; });
+  rg.addEventListener('change',function(){ mSliding=false; var d=musicDev(); if(!d) return; var v=rg.value/100;
+    d.capabilitiesObj.volume_set.value=v; setCap(d.id,'volume_set',v).catch(function(e){ showErr(e.message); }); });
+})();
 function spk(d,act){
   if(!d) return;
   var p;
@@ -571,30 +676,54 @@ function spk(d,act){
 
 /* scherm 2 */
 var target=null, sliding=false;
-function renderPlayers(){
-  if(sliding) return;
-  var h='';
-  speakers().forEach(function(d){
-    var tr=trackOf(d), pl=cap(d,'speaker_playing'), u=artUrl(d), vol=cap(d,'volume_set');
-    h+='<div class="pl'+(pl?' playing':'')+'" data-id="'+d.id+'"><div class="top">'+
-      '<div class="art" style="'+(u&&tr.a?'background-image:url(&quot;'+u+'&quot;)':'')+'">'+(u&&tr.a?'':'♪')+'</div>'+
-      '<div class="mt"><div class="nm">'+esc(d.name)+(pl?' · speelt':'')+'</div><b>'+esc(tr.t)+'</b><span>'+esc(tr.a)+'</span></div></div>'+
-      '<div class="row2">'+(has(d,'speaker_prev')?'<div class="ctl" data-a="prev">'+PREV+'</div>':'')+
-      '<div class="ctl big" data-a="play">'+(pl?PAUSE:PLAY)+'</div>'+
-      (has(d,'speaker_next')?'<div class="ctl" data-a="next">'+NEXT+'</div>':'')+
-      (vol!==null?'<input type="range" min="0" max="100" value="'+Math.round(vol*100)+'">':'')+'</div></div>';
-  });
-  $('players').innerHTML=h;
-  Array.prototype.forEach.call($('players').querySelectorAll('.pl'),function(el){
+function isSonos(d){ return (d.driverId||'').indexOf('com.sonos')>=0; }
+function plCard(d,big){
+  var tr=trackOf(d), pl=cap(d,'speaker_playing'), u=artUrl(d), vol=cap(d,'volume_set'), h='';
+  h+='<div class="pl'+(pl?' playing':'')+'" data-id="'+d.id+'"><div class="top">'+
+    '<div class="art" style="'+(u&&tr.a?'background-image:url(&quot;'+u+'&quot;)':'')+'">'+(u&&tr.a?'':'♪')+'</div>'+
+    '<div class="mt"><div class="nm">'+esc(d.name)+(pl?' · speelt':'')+'</div><b>'+esc(tr.t)+'</b><span>'+esc(tr.a)+'</span></div></div>'+
+    '<div class="row2">'+(has(d,'speaker_prev')?'<div class="ctl" data-a="prev">'+PREV+'</div>':'')+
+    '<div class="ctl big" data-a="play">'+(pl?PAUSE:PLAY)+'</div>'+
+    (has(d,'speaker_next')?'<div class="ctl" data-a="next">'+NEXT+'</div>':'')+
+    (vol!==null?'<input type="range" min="0" max="100" value="'+Math.round(vol*100)+'">':'')+'</div>';
+  if(big && isSonos(d)){
+    var g=cap(d,'sonos_group')||'';
+    h+='<div class="grp">Groep: ';
+    sonosList().forEach(function(o){ if(o.id===d.id) return;
+      var inG = g && (cap(o,'sonos_group')||'')===g;
+      h+='<div class="chip'+(inG?' in':'')+'" data-j="'+o.id+'">'+(inG?'✓ ':'+ ')+esc(o.name.replace('Sonos ',''))+'</div>'; });
+    h+='</div>';
+  }
+  return h+'</div>';
+}
+function bindCards(root){
+  Array.prototype.forEach.call(root.querySelectorAll('.pl'),function(el){
     var d=S.devices[el.getAttribute('data-id')];
     Array.prototype.forEach.call(el.querySelectorAll('.ctl'),function(b){ tap(b,function(){ spk(d,b.getAttribute('data-a')); }); });
+    Array.prototype.forEach.call(el.querySelectorAll('[data-j]'),function(c){ tap(c,function(){ toggleGroup(d, S.devices[c.getAttribute('data-j')]); }); });
     var rg=el.querySelector('input');
     if(rg){
-      rg.addEventListener('touchstart',function(){sliding=true;}); rg.addEventListener('mousedown',function(){sliding=true;});
+      rg.addEventListener('touchstart',function(){sliding=true;},{passive:true}); rg.addEventListener('mousedown',function(){sliding=true;});
       rg.addEventListener('change',function(){ sliding=false; var v=rg.value/100; d.capabilitiesObj.volume_set.value=v;
         setCap(d.id,'volume_set',v).catch(function(e){ showErr(d.name+': '+e.message); }); });
     }
   });
+}
+function toggleGroup(host, other){
+  if(!host||!other) return;
+  var g=cap(host,'sonos_group')||'', inG = g && (cap(other,'sonos_group')||'')===g, p;
+  if(inG){ toast(other.name+' uit de groep'); p=runCard(other.id,'cloud_leave_current_group',{}); }
+  else { toast(other.name+' toegevoegd aan '+host.name); p=runCard(other.id,'cloud_join_player',{player:{id:host.id,name:host.name}}); }
+  p.then(function(){ setTimeout(loadLive,2500); setTimeout(loadLive,6000); }).catch(function(e){ showErr(e.message); });
+}
+function renderPlayers(){
+  if(sliding) return;
+  var big='', small='', m=musicDev();
+  var son=sonosList(); son.sort(function(a,b){ return a===m?-1:(b===m?1:(a.name<b.name?-1:1)); });
+  son.forEach(function(d){ big+=plCard(d,true); });
+  speakers().forEach(function(d){ if(!isSonos(d)) small+=plCard(d,false); });
+  $('players').innerHTML=big; $('players2').innerHTML=small;
+  bindCards($('players')); bindCards($('players2'));
   renderTargets();
 }
 function sonosList(){ return speakers().filter(function(d){ return (d.driverId||'').indexOf('com.sonos')>=0; }); }
@@ -628,11 +757,13 @@ function renderFavs(){
 }
 
 /* ---------- schermen wisselen ---------- */
-var cur=1;
+var cur=1, mapTimer=null;
 function go(n){
-  cur=n; $('scr1').className='screen'+(n===1?' show':''); $('scr2').className='screen'+(n===2?' show':'');
-  $('d1').className=n===1?'on':''; $('d2').className=n===2?'on':'';
+  cur=n;
+  [1,2,3].forEach(function(i){ $('scr'+i).className='screen'+(n===i?' show':''); $('d'+i).className=(n===i?'on':''); });
   if(n===2){ renderPlayers(); if(!S.favs.length) loadFavs(); }
+  clearInterval(mapTimer);
+  if(n===3){ renderRoboOpts(); renderRobot(); refreshMap(); mapTimer=setInterval(refreshMap,8000); }
 }
 (function(){
   var sx=0, sy=0;
@@ -640,7 +771,7 @@ function go(n){
   document.addEventListener('touchend',function(e){
     if(sliding) return;
     var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
-    if(Math.abs(dx)>90 && Math.abs(dx)>2*Math.abs(dy)){ if(dx<0 && cur===1) go(2); else if(dx>0 && cur===2) go(1); }
+    if(Math.abs(dx)>90 && Math.abs(dx)>2*Math.abs(dy)){ if(dx<0 && cur<3) go(cur+1); else if(dx>0 && cur>1) go(cur-1); }
   },{passive:true});
 })();
 
@@ -671,10 +802,23 @@ function renderWeather(w){
 }
 
 /* ---------- deurbel ---------- */
+var RLPW=store.get('rlpw')||'';
+function liveUrl(){ return RLPW ? 'http://'+CFG.doorbellIp+'/cgi-bin/api.cgi?cmd=Snap&channel=0&width=1024&height=768&user=admin&password='+encodeURIComponent(RLPW)+'&rs=' : null; }
+var liveFail=0;
+function liveOn(){ return !!(doorOpen && liveUrl() && liveFail<3); }
+function liveLoop(){
+  if(!doorOpen) return;
+  if(!liveOn()){ $('liveTag').style.display='none'; return; } // geen wachtwoord of fout: camLoop ververst via Homey
+  var n=new Image();
+  n.onload=function(){ $('doorImg').src=n.src; n=null; liveFail=0; $('liveTag').style.display='block'; setTimeout(liveLoop,150); };
+  n.onerror=function(){ liveFail++; $('liveTag').style.display='none'; setTimeout(liveLoop,1500); };
+  n.src=liveUrl()+Date.now();
+}
+function openLive(){ $('doorTitle').textContent='Voordeur'; showDoor(120); }
 function camUrl(){ var d=byName(CFG.doorbellDevice); if(!d||!d.images||!d.images.length) return null; var im=d.images[0].imageObj; return im ? HOST+im.url : null; }
 function camLoop(getEl, getDelay){
   function next(){
-    if(document.hidden || (asleep && !doorOpen)){ setTimeout(next,3000); return; }
+    if(document.hidden || (asleep && !doorOpen) || liveOn()){ setTimeout(next,1500); return; }
     var u= DEMO? demoCam() : camUrl();
     if(!u){ setTimeout(next,2000); return; }
     var n=new Image();
@@ -696,27 +840,30 @@ function pollMotion(){
   if(!asleep && Date.now()-lastMotion > CFG.sleepMin*60000) goSleep();
 }
 document.addEventListener('touchstart',function(){ if(!asleep) lastMotion=Date.now(); },true);
+document.addEventListener('visibilitychange',function(){ if(!document.hidden){ wake(); loadLive(); } });
+window.addEventListener('pageshow',function(){ wake(); });
 $('sleep').addEventListener('click',function(e){ e.stopPropagation(); wake(); });
 
 var doorOpen=false, doorTimer=null;
-function showDoor(){ wake(); doorOpen=true; $('door').className='ov door show'; clearTimeout(doorTimer); doorTimer=setTimeout(hideDoor, CFG.doorShowSec*1000); }
+function showDoor(sec){ wake(); var was=doorOpen; doorOpen=true; $('door').className='ov door show'; clearTimeout(doorTimer); doorTimer=setTimeout(hideDoor, (sec||CFG.doorShowSec)*1000); if(!was){ liveFail=0; liveLoop(); } }
 var doorMuteUntil=0;
-function hideDoor(){ doorOpen=false; doorMuteUntil=Date.now()+20000; $('door').className='ov door'; clearTimeout(doorTimer); }
+function hideDoor(){ doorOpen=false; $('liveTag').style.display='none'; setTimeout(function(){ $('doorTitle').textContent='🔔 Er staat iemand voor de deur'; },500); doorMuteUntil=Date.now()+20000; $('door').className='ov door'; clearTimeout(doorTimer); }
 function varId(name){ var r=null; each(S.vars,function(v,k){ if(v.name===name) r=k; }); return r; }
 var doorBusy=false;
 function pollDoorbell(){
   var id=varId(CFG.doorbellVar); if(!id||doorBusy) return;
   doorBusy=true;
   api('GET','manager/logic/variable/'+id).then(function(v){
-    if(v && v.value===true){ if(Date.now()>doorMuteUntil){ go(1); showDoor(); } return api('PUT','manager/logic/variable/'+id,{value:false}); }
+    if(v && v.value===true){ if(Date.now()>doorMuteUntil){ go(1); $('doorTitle').textContent='🔔 Er staat iemand voor de deur'; showDoor(); } return api('PUT','manager/logic/variable/'+id,{value:false}); }
   }).catch(function(){}).then(function(){ doorBusy=false; });
 }
 
 /* ---------- instellingen ---------- */
-function openSetup(){ $('sHost').value=HOST; $('sKey').value=''; $('setupOv').className='ov show'; }
+function openSetup(){ $('sHost').value=HOST; $('sKey').value=''; $('sRl').value=''; $('setupOv').className='ov show'; }
 tap($('sSave'),function(){
   var h=$('sHost').value.trim().replace(/\/+$/,''), k=$('sKey').value.trim();
   if(h){ store.set('homeyHost',h); HOST=h; } if(k){ store.set('homeyKey',k); KEY=k; }
+  var rp=$('sRl').value; if(rp){ store.set('rlpw',rp); RLPW=rp; liveFail=0; }
   $('setupOv').className='ov'; start();
 });
 (function(){ var t=null, el=$('clockCard');
@@ -739,6 +886,17 @@ tap($('mPlay'),function(){ spk(musicDev(),'play'); });
 tap($('mArt'),function(){ go(2); });
 tap($('mText'),function(){ go(2); });
 tap($('back'),function(){ go(1); });
+tap($('back3'),function(){ go(1); });
+tap($('camBox'),openLive);
+tap($('roboHead'),function(){ go(3); });
+tap($('roboSt'),function(){ go(3); });
+tap($('rGo'),startClean);
+tap($('rPause'),function(){ var r=byName(CFG.robot), p=cap(r,'pause_clean'); robo(p?'resume_clean':'pause_clean',{}, p?'Verder poetsen':'Pauze'); });
+tap($('rDock'),function(){ robo('stop_clean',{}).then(function(){ return robo('dock',{},'Terug naar dock'); }); });
+tap($('rLocate'),function(){ var r=byName(CFG.robot); if(r){ toast('Jacqueline laat van zich horen'); setCap(r.id,'locate',true).catch(function(e){ showErr(e.message); }); } });
+tap($('rRepeat'),function(){ robo('repeat_last_clean',{},'Laatste beurt herhalen'); });
+tap($('rEmpty'),function(){ robo('empty_dustbin',{},'Stofzak legen'); });
+tap($('rWash'),function(){ robo('wash_mop',{},'Dweil wassen'); });
 tap($('door'),hideDoor);
 
 /* ---------- start ---------- */
@@ -760,7 +918,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-24-v8';
+var VERSION='2026-11-24-v10';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
@@ -792,7 +950,7 @@ function demoApi(method,path){
     C('Gas kosten',{meter_money_this_day:1.18},{driverId:'homey:app:com.gruijter.powerhour:gas'});
     C('Laadpaal',{measure_power:7400,evcharger_charging:true,evcharger_charging_state:'plugged_in_charging'});
     C('Lampjes voortuin',{onoff:true});
-    C('Jacqueline',{is_cleaning:false,dock:true,measure_battery:100,battery_charging_state:'charging',alarm_water_box_empty:true});
+    var jr=C('Jacqueline',{is_cleaning:false,dock:true,measure_battery:100,battery_charging_state:'charging',clean_area:51.9,clean_time:0.97,mop_attached:true,clean_room_pick:null}); jr.capabilitiesObj.clean_room_pick.values=[{id:'1',title:'woonkamer'},{id:'2',title:'keuken'}];
     var sp=[['Keuken','com.sonos',true,'Mr. Brightside','The Killers','z2'],['Sonos Woonkamer','com.sonos',false,'Homey',null,'z1'],['Sonos Badkamer','com.sonos',false,null,null,'x'],
             ['Chromecast woonkamer','chromecast',false,'Idle','','x'],['Chromecast veranda','chromecast',false,'YouTube','YouTube','x'],['Speaker garage','chromecast',true,'Er is maar één NPO Radio 2','NPO Radio 2','x'],['Home pod','homepod',false,'NPO Radio 2','AirMusic','x']];
     sp.forEach(function(s){ C(s[0],{speaker_playing:s[2],speaker_track:s[3],speaker_artist:s[4],speaker_next:null,speaker_prev:null,volume_set:0.3},{'class':'speaker',driverId:'homey:app:'+s[1]+':x',zone:s[5]}); });
