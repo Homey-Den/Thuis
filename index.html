@@ -234,6 +234,11 @@ var store = {
 };
 var HOST = store.get('homeyHost') || CFG.host;
 var KEY = store.get('homeyKey') || '';
+/* sleutel via de link (#key=...), handig via QR-code; blijft in de beginscherm-bladwijzer staan */
+(function(){
+  var m = /[#&]key=([^&]+)/.exec(location.hash || '');
+  if(m){ KEY = decodeURIComponent(m[1]); store.set('homeyKey', KEY); }
+})();
 
 var S = { devices:{}, zones:{}, moods:{}, flows:{}, vars:{}, users:[] };
 function $(id){ return document.getElementById(id); }
