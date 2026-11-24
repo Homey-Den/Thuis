@@ -143,6 +143,26 @@
   .rgrid .act{height:44px;font-size:13px;}
   .rstat{display:grid;grid-template-columns:repeat(4,1fr);grid-gap:6px;font-size:12px;color:var(--mut);}
   .rstat b{display:block;font-size:18px;color:var(--txt);font-weight:500;}
+  .s4{height:100%;padding:12px 14px;display:flex;flex-direction:column;}
+  .s4top{display:flex;flex-wrap:wrap;margin:0 -4px 8px;}
+  .s4top .act{height:42px;margin:4px;padding:0 14px;font-size:13px;}
+  .lscroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:20px;}
+  .zone{margin-top:10px;}
+  .zone .zh{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:0 2px 6px;}
+  .zone .zh span{display:flex;}
+  .zone .zh .chip{padding:5px 12px;font-size:12px;margin-left:6px;text-transform:none;letter-spacing:0;}
+  .lamps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:8px;}
+  .lp{background:var(--card);border-radius:14px;padding:10px 12px;}
+  .lp.on{background:linear-gradient(160deg,#3d3218,#232019);}
+  .lp .r1{display:flex;align-items:center;justify-content:space-between;}
+  .lp .n{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:8px;}
+  .lp .sw{width:48px;height:28px;border-radius:14px;background:#3a3f4b;position:relative;flex:none;}
+  .lp .sw:after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:11px;background:#fff;}
+  .lp.on .sw{background:var(--acc);} .lp.on .sw:after{left:23px;}
+  .lp input{width:100%;height:28px;margin-top:6px;}
+  .lp .cols{display:flex;margin-top:6px;}
+  .lp .cols i{flex:1;height:22px;border-radius:6px;margin-right:5px;}
+  .lp .cols i:last-child{margin-right:0;}
   .door .live{position:absolute;right:24px;bottom:20px;background:#c0392b;color:#fff;padding:4px 10px;border-radius:8px;font-size:13px;font-weight:600;display:none;}
   .pl{background:var(--card);border-radius:16px;padding:12px;}
   .pl .top{display:flex;align-items:center;}
@@ -214,7 +234,7 @@
       <div class="cam" id="camBox"><img id="camImg" alt=""><div class="tag">Live</div></div>
     </div>
     <div class="card">
-      <div class="lbl">Verlichting</div>
+      <div class="lbl" id="lightHead"><span>Verlichting</span><span>alle lampen ›</span></div>
       <div class="acts">
         <div class="act cook" id="cook"><span class="i">🍳</span>Kookmodus</div>
         <div class="act night" id="night"><span class="i">🌙</span>Nachtstand</div>
@@ -308,7 +328,14 @@
   </div>
 </div></div>
 
-<div class="dots"><i id="d1" class="on"></i><i id="d2"></i><i id="d3"></i></div>
+<!-- ================= SCHERM 4: VERLICHTING ================= -->
+<div class="screen" id="scr4"><div class="s4">
+  <div class="s2head"><div class="back" id="back4">‹ Thuis</div><h1>Verlichting</h1></div>
+  <div class="s4top" id="lTop"></div>
+  <div class="lscroll" id="lList"></div>
+</div></div>
+
+<div class="dots"><i id="d1" class="on"></i><i id="d2"></i><i id="d3"></i><i id="d4"></i></div>
 
 <!-- deurbel groot -->
 <div class="ov door" id="door"><img id="doorImg" alt="">
@@ -357,6 +384,8 @@ var CFG = {
   robot: 'Jacqueline', robotKitchenRooms: 'keuken',
   musicZone: 'Keuken',
   motion: 'Beweging keuken',
+  lightGroups: [{name:'Keukenlampen', members:['Lamp keuken 1','Lamp keuken 2','Lamp keuken 3']},
+                {name:'Lichtstaven', members:['Lichtstaaf woonkamer 1','Lichtstaaf woonkamer 2']}],
   doorbellIp: '192.168.1.200',
   sleepMin: 6,
   pollMs: 8000
@@ -445,7 +474,8 @@ function musicDev(){
   return r;
 }
 
-function renderAll(){ renderActs(); renderPeople(); renderTemps(); renderEnergy(); renderRobot(); renderMusic(); if(cur===2) renderPlayers(); }
+function renderAll(){ if(cur===4) renderLights();
+ renderActs(); renderPeople(); renderTemps(); renderEnergy(); renderRobot(); renderMusic(); if(cur===2) renderPlayers(); }
 
 /* ---------- verlichting ---------- */
 function triggerFlow(name,msg){
@@ -499,6 +529,82 @@ function renderActs(){
   c.className='act cook'+(p?' on':'');
   c.innerHTML='<span class="i">🍳</span>'+(p?'Kookmodus uit':'Kookmodus');
   $('garland').className='act lamp'+(cap(byName(CFG.garland),'onoff')?' on':'');
+}
+
+/* ---------- scherm 4: alle lampen ---------- */
+var LCOL=[['t',1,'#ffc46b','Warm'],['t',0.5,'#ffe9c7','Neutraal'],['t',0,'#dfefff','Koel'],['h',0,'#ff4a3d','Rood'],['h',0.33,'#3ddc6a','Groen'],['h',0.62,'#3d7bff','Blauw'],['h',0.8,'#b04dff','Paars']];
+function isLamp(d){
+  if(!has(d,'onoff')) return false;
+  if(d['class']==='light') return true;
+  return d['class']==='socket' && /lamp|licht|led|flood|kerst|lampjes/i.test(d.name) && !/dashboard/i.test(d.name);
+}
+function renderLightTop(){
+  var h='<div class="act cook" data-f="cook">🍳 Kookmodus</div><div class="act night" data-f="night">🌙 Nachtstand</div><div class="act off" data-f="off">Alles uit</div>';
+  var ms=[]; each(S.moods,function(m){ ms.push(m.name); }); ms.sort();
+  ms.forEach(function(n){ h+='<div class="act" data-m="'+esc(n)+'">'+esc(n)+'</div>'; });
+  $('lTop').innerHTML=h;
+  Array.prototype.forEach.call($('lTop').querySelectorAll('[data-m]'),function(el){ tap(el,function(){ setMood(el.getAttribute('data-m')); setTimeout(renderLights,1500); }); });
+  tap($('lTop').querySelector('[data-f=cook]'),toggleCook);
+  tap($('lTop').querySelector('[data-f=night]'),function(){ store.set('kookPrev',''); renderActs(); triggerFlow(CFG.nightFlow,'Nachtstand'); });
+  tap($('lTop').querySelector('[data-f=off]'),function(){ store.set('kookPrev',''); renderActs(); triggerFlow(CFG.allOffFlow,'Alle lampen uit'); });
+}
+var LG={};
+function lampSet(d,c,v){
+  if(d.members) return Promise.all(d.members.map(function(m){ if(has(m,c)) m.capabilitiesObj[c].value=v; return has(m,c)? setCap(m.id,c,v) : null; }));
+  return setCap(d.id,c,v);
+}
+function renderLights(){
+  if(sliding) return;
+  var byZone={}, grouped={};
+  (CFG.lightGroups||[]).forEach(function(g,i){
+    var mem=g.members.map(byName).filter(function(x){ return x; }); if(!mem.length) return;
+    mem.forEach(function(m){ grouped[m.id]=1; });
+    var f=mem[0], co={};
+    each(f.capabilitiesObj,function(o,k){ co[k]={value:o.value}; });
+    if(co.onoff) co.onoff.value=mem.some(function(m){ return cap(m,'onoff'); });
+    var gd={id:'grp'+i, name:g.name+' ('+mem.length+')', zone:f.zone, 'class':'light', members:mem, capabilitiesObj:co};
+    LG[gd.id]=gd; (byZone[f.zone]=byZone[f.zone]||[]).push(gd);
+  });
+  each(S.devices,function(d){ if(isLamp(d) && !grouped[d.id]){ (byZone[d.zone]=byZone[d.zone]||[]).push(d); } });
+  var zs=Object.keys(byZone).sort(function(a,b){ var A=(S.zones[a]||{}).name||'', B=(S.zones[b]||{}).name||''; return A<B?-1:1; });
+  var h='';
+  zs.forEach(function(z){
+    var list=byZone[z].sort(function(a,b){ return a.name<b.name?-1:1; });
+    h+='<div class="zone"><div class="zh">'+esc((S.zones[z]||{}).name||'Overig')+'<span><div class="chip" data-za="'+z+'" data-v="1">Alles aan</div><div class="chip" data-za="'+z+'" data-v="0">Alles uit</div></span></div><div class="lamps">';
+    list.forEach(function(d){
+      var on=cap(d,'onoff'), dim=cap(d,'dim');
+      h+='<div class="lp'+(on?' on':'')+'" data-id="'+d.id+'"><div class="r1"><div class="n">'+esc(d.name)+'</div><div class="sw"></div></div>';
+      if(dim!==null) h+='<input type="range" min="1" max="100" value="'+Math.round((dim||0)*100)+'">';
+      if(has(d,'light_hue')||has(d,'light_temperature')){
+        h+='<div class="cols">'; LCOL.forEach(function(c,i){ if((c[0]==='t'&&has(d,'light_temperature'))||(c[0]==='h'&&has(d,'light_hue'))) h+='<i data-c="'+i+'" style="background:'+c[2]+'"></i>'; }); h+='</div>';
+      }
+      h+='</div>';
+    });
+    h+='</div></div>';
+  });
+  $('lList').innerHTML=h;
+  Array.prototype.forEach.call($('lList').querySelectorAll('[data-za]'),function(el){
+    tap(el,function(){ var z=el.getAttribute('data-za'), v=el.getAttribute('data-v')==='1', p=[];
+      (byZone[z]||[]).forEach(function(d){ d.capabilitiesObj.onoff.value=v; p.push(lampSet(d,'onoff',v)); });
+      renderLights(); Promise.all(p).then(function(){ setTimeout(loadLive,800); }).catch(function(e){ showErr(e.message); }); });
+  });
+  Array.prototype.forEach.call($('lList').querySelectorAll('.lp'),function(el){
+    var d=S.devices[el.getAttribute('data-id')]||LG[el.getAttribute('data-id')];
+    tap(el.querySelector('.sw'),function(){ var v=!cap(d,'onoff'); d.capabilitiesObj.onoff.value=v; renderLights(); lampSet(d,'onoff',v).catch(function(e){ showErr(d.name+': '+e.message); }); });
+    var rg=el.querySelector('input');
+    if(rg){
+      rg.addEventListener('touchstart',function(){ sliding=true; },{passive:true}); rg.addEventListener('mousedown',function(){ sliding=true; });
+      rg.addEventListener('change',function(){ sliding=false; var v=rg.value/100; d.capabilitiesObj.dim.value=v; if(has(d,'onoff')) d.capabilitiesObj.onoff.value=true;
+        lampSet(d,'dim',v).then(function(){ renderLights(); }).catch(function(e){ showErr(d.name+': '+e.message); }); });
+    }
+    Array.prototype.forEach.call(el.querySelectorAll('[data-c]'),function(c){
+      tap(c,function(){ var o=LCOL[+c.getAttribute('data-c')], ch;
+        if(o[0]==='t') ch= has(d,'light_mode') ? lampSet(d,'light_mode','temperature').catch(function(){}).then(function(){ return lampSet(d,'light_temperature',o[1]); }) : lampSet(d,'light_temperature',o[1]);
+        else ch= lampSet(d,'light_hue',o[1]).then(function(){ return has(d,'light_saturation')? lampSet(d,'light_saturation',1):null; });
+        ch.then(function(){ return lampSet(d,'onoff',true); }).then(function(){ toast(d.name+': '+o[3]); setTimeout(loadLive,800); }).catch(function(e){ showErr(d.name+': '+e.message); });
+      });
+    });
+  });
 }
 
 /* ---------- aanwezigheid & temperatuur ---------- */
@@ -760,10 +866,11 @@ function renderFavs(){
 var cur=1, mapTimer=null;
 function go(n){
   cur=n;
-  [1,2,3].forEach(function(i){ $('scr'+i).className='screen'+(n===i?' show':''); $('d'+i).className=(n===i?'on':''); });
+  [1,2,3,4].forEach(function(i){ $('scr'+i).className='screen'+(n===i?' show':''); $('d'+i).className=(n===i?'on':''); });
   if(n===2){ renderPlayers(); if(!S.favs.length) loadFavs(); }
   clearInterval(mapTimer);
   if(n===3){ renderRoboOpts(); renderRobot(); refreshMap(); mapTimer=setInterval(refreshMap,8000); }
+  if(n===4){ renderLightTop(); renderLights(); $('lList').scrollTop=0; }
 }
 (function(){
   var sx=0, sy=0;
@@ -771,7 +878,7 @@ function go(n){
   document.addEventListener('touchend',function(e){
     if(sliding) return;
     var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
-    if(Math.abs(dx)>90 && Math.abs(dx)>2*Math.abs(dy)){ if(dx<0 && cur<3) go(cur+1); else if(dx>0 && cur>1) go(cur-1); }
+    if(Math.abs(dx)>90 && Math.abs(dx)>2*Math.abs(dy)){ if(dx<0 && cur<4) go(cur+1); else if(dx>0 && cur>1) go(cur-1); }
   },{passive:true});
 })();
 
@@ -887,6 +994,8 @@ tap($('mArt'),function(){ go(2); });
 tap($('mText'),function(){ go(2); });
 tap($('back'),function(){ go(1); });
 tap($('back3'),function(){ go(1); });
+tap($('back4'),function(){ go(1); });
+tap($('lightHead'),function(){ go(4); });
 tap($('camBox'),openLive);
 tap($('roboHead'),function(){ go(3); });
 tap($('roboSt'),function(){ go(3); });
@@ -918,7 +1027,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-24-v10';
+var VERSION='2026-11-24-v13';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
@@ -939,7 +1048,7 @@ function demoApi(method,path){
   if(path.indexOf('devices')>=0){
     var D={}, n=0;
     function C(name,obj,extra){ var c={}; each(obj,function(v,k){c[k]={value:v};}); var id='d'+(++n); D[id]={id:id,name:name,zone:'x','class':'sensor',capabilitiesObj:c}; if(extra) each(extra,function(v,k){D[id][k]=v;}); return D[id]; }
-    C('Lamp keuken 1',{onoff:false,dim:1},{zone:'z2','class':'light'});
+    C('Lamp keuken 1',{onoff:false,dim:1,light_hue:0,light_temperature:0.5},{zone:'z2','class':'light'}); C('Lamp keuken 2',{onoff:true,dim:0.6,light_hue:0,light_temperature:0.5},{zone:'z2','class':'light'}); C('Lamp keuken 3',{onoff:false,dim:0.6,light_hue:0,light_temperature:0.5},{zone:'z2','class':'light'}); C('Lichtstaaf woonkamer 1',{onoff:true,dim:0.4,light_hue:0,light_temperature:1},{zone:'z1','class':'light'}); C('Schemerlamp',{onoff:false,dim:0.3},{zone:'z1','class':'light'}); C('Hal',{onoff:false,dim:0.5},{zone:'z3','class':'light'});
     C('Temp Woonkamer',{measure_temperature:20.4}); C('Temp Keuken',{measure_temperature:19.8});
     var e=C('Temp Entree',{measure_temperature:26.9}); e.capabilitiesObj.measure_temperature.lastUpdated=Date.now()-200*3600000;
     C('Temp Slaapkamer',{measure_temperature:16.9}); C('Temp Kantoor',{measure_temperature:19.1}); C('Temp Wasruimte',{measure_temperature:15.3});
