@@ -186,6 +186,21 @@
   .dots i{width:7px;height:7px;border-radius:4px;background:#3a3f4b;margin:0 4px;}
   .dots i.on{background:#9aa0ad;}
 
+  /* temperatuurgrafiek */
+  .panel.tpanel{width:980px;height:700px;max-height:none;overflow:hidden;display:flex;flex-direction:column;}
+  .tpanel .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .tpanel .hd h2{margin:0;}
+  .tpanel .x{font-size:16px;font-weight:500;background:rgba(255,255,255,.1);padding:10px 18px;border-radius:12px;}
+  #tChart{flex:1;min-height:0;}
+  #tChart svg{width:100%;height:100%;display:block;}
+  .tleg{display:flex;flex-wrap:wrap;margin-top:10px;}
+  .tleg div{display:flex;align-items:center;font-size:15px;padding:8px 12px;margin:0 8px 8px 0;border-radius:10px;background:var(--card2);}
+  .tleg div.off{opacity:.35;}
+  .tleg i{width:12px;height:12px;border-radius:6px;margin-right:8px;}
+  .tleg b{font-weight:600;margin-left:8px;}
+  .tleg small{color:var(--mut);margin-left:6px;font-size:12px;}
+  .tmsg{color:var(--mut);font-size:17px;padding:40px;text-align:center;}
+
   /* overlays */
   .ov{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.92);display:none;z-index:10;}
   .ov.show{display:block;}
@@ -220,8 +235,8 @@
       <div class="lbl">Thuis</div>
       <div id="ppl"></div>
     </div>
-    <div class="card grow">
-      <div class="lbl">Temperatuur</div>
+    <div class="card grow" id="tempCard">
+      <div class="lbl">Temperatuur <span style="float:right">24 UUR ›</span></div>
       <div class="bigT" id="tMain">--°<small>woonkamer</small></div>
       <div id="temps" style="margin-top:4px"></div>
     </div>
@@ -342,6 +357,13 @@
   <div class="bar2"><div id="doorTitle">🔔 Er staat iemand voor de deur</div><div class="x">Sluiten</div></div><div class="live" id="liveTag">● LIVE</div>
 </div>
 
+<!-- temperatuur 24 uur -->
+<div class="ov" id="tempOv"><div class="panel tpanel">
+  <div class="hd"><h2>Temperatuur · afgelopen 24 uur</h2><div class="x" id="tClose">Sluiten</div></div>
+  <div id="tChart"><div class="tmsg">Laden…</div></div>
+  <div class="tleg" id="tLeg"></div>
+</div></div>
+
 <!-- instellingen -->
 <div class="ov" id="setupOv"><div class="panel setup">
   <h2>Instellingen</h2>
@@ -377,7 +399,7 @@ var CFG = {
   doorbellVar: 'Deurbel',
   doorbellDevice: 'voordeur',
   doorShowSec: 60,
-  temps: [['Temp Keuken','Keuken'],['Temp Entree','Hal'],['Temp Slaapkamer','Slaapkamer'],['Temp Kantoor','Kantoor'],
+  temps: [['Temp Keuken','Keuken'],['Temp Entree','Entree'],['Temp Slaapkamer','Slaapkamer'],['Temp Kantoor','Kantoor'],
           ['Temp Wasruimte','Wasruimte'],['Temp Garage','Garage'],['Temp Domein Jes','Domein Jes']],
   mainTemp: 'Temp Woonkamer',
   p1: 'P1 Meter', prices: 'Energieprijzen', ev: 'Laadpaal',
@@ -406,7 +428,7 @@ function $(id){ return document.getElementById(id); }
 function each(o,f){ for(var k in o){ if(Object.prototype.hasOwnProperty.call(o,k)) f(o[k],k); } }
 function cap(d,c){ return d && d.capabilitiesObj && d.capabilitiesObj[c] ? d.capabilitiesObj[c].value : null; }
 function has(d,c){ return !!(d && d.capabilitiesObj && d.capabilitiesObj[c]); }
-function byName(n){ var r=null; each(S.devices,function(d){ if(d.name===n) r=d; }); return r; }
+function byName(n){ var r=null, l=String(n).toLowerCase(); each(S.devices,function(d){ if(d.name===n) r=d; }); if(!r) each(S.devices,function(d){ if(!r && String(d.name).toLowerCase()===l) r=d; }); return r; }
 function tap(el,fn){ if(!el) return; el.addEventListener('click',function(e){ e.stopPropagation(); fn(e); }); }
 function esc(s){ return String(s===null||s===undefined?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function pad(n){ return (n<10?'0':'')+n; }
@@ -1009,6 +1031,59 @@ tap($('rRepeat'),function(){ robo('repeat_last_clean',{},'Laatste beurt herhalen
 tap($('rEmpty'),function(){ robo('empty_dustbin',{},'Stofzak legen'); });
 tap($('rWash'),function(){ robo('wash_mop',{},'Dweil wassen'); });
 tap($('door'),hideDoor);
+tap($('tempCard'),openTemps);
+tap($('tClose'),closeTemps);
+tap($('tempOv'),closeTemps);
+tap(document.querySelector('.tpanel'),function(){});
+
+/* ---------- temperatuurgrafiek ---------- */
+var TCOL=['#ffb547','#5ac8fa','#ff6b6b','#7ed957','#c792ea','#f78fb3','#4dd0b5','#e8e8e8','#ffd166'];
+var tSeries=[], tHidden={}, tTimer=null;
+function tempList(){ var L=[[CFG.mainTemp,'Woonkamer']]; CFG.temps.forEach(function(t){ L.push(t); }); return L; }
+function openTemps(){ $('tempOv').className='ov show'; $('tChart').innerHTML='<div class="tmsg">Laden…</div>'; $('tLeg').innerHTML=''; loadTemps();
+  clearTimeout(tTimer); tTimer=setTimeout(closeTemps,180000); }
+function closeTemps(){ $('tempOv').className='ov'; clearTimeout(tTimer); }
+function loadTemps(){
+  var L=tempList();
+  Promise.all(L.map(function(t,i){
+    var d=byName(t[0]); if(!d) return Promise.resolve(null);
+    var u='homey:device:'+d.id, p=DEMO ? Promise.resolve(demoHist(i)) :
+      api('GET','manager/insights/log/'+u+'/'+u+':measure_temperature/entry?resolution=last24Hours');
+    return p.then(function(r){ return {name:t[1], col:TCOL[i%TCOL.length], now:cap(d,'measure_temperature'),
+      pts:((r&&r.values)||[]).filter(function(v){ return v.v!==null&&v.v!==undefined; }).map(function(v){ return [new Date(v.t).getTime(), v.v]; })}; });
+  })).then(function(res){ tSeries=res.filter(function(x){ return x; }); drawTemps(); })
+  .catch(function(e){ $('tChart').innerHTML='<div class="tmsg">Kan de geschiedenis niet ophalen.<br>'+esc(e.message)+
+     (/40[13]/.test(e.message)?'<br><br>De API-sleutel van het dashboard heeft nog geen leesrechten voor Insights.':'')+'</div>'; });
+}
+function drawTemps(){
+  var box=$('tChart'), W=box.clientWidth||930, H=box.clientHeight||520, l=44, r=12, tp=10, b=28;
+  var t1=Date.now(), t0=t1-24*3600000, lo=99, hi=-99;
+  tSeries.forEach(function(s){ if(tHidden[s.name]) return; s.pts.forEach(function(p){ if(p[0]>=t0){ lo=Math.min(lo,p[1]); hi=Math.max(hi,p[1]); } }); });
+  if(lo>hi){ lo=10; hi=20; }
+  lo=Math.floor(lo-0.5); hi=Math.ceil(hi+0.5); var step=(hi-lo)>12?4:(hi-lo)>6?2:1;
+  lo=Math.floor(lo/step)*step; hi=Math.ceil(hi/step)*step;
+  function X(t){ return l+(t-t0)/(t1-t0)*(W-l-r); } function Y(v){ return tp+(hi-v)/(hi-lo)*(H-tp-b); }
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  for(var v=lo; v<=hi; v+=step){ s+='<line x1="'+l+'" x2="'+(W-r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#2c313c" stroke-width="1"/>'+
+    '<text x="'+(l-8)+'" y="'+(Y(v)+4)+'" fill="#8a909c" font-size="12" text-anchor="end">'+v+'°</text>'; }
+  var h0=new Date(t0); h0.setMinutes(0,0,0); 
+  for(var h=h0.getTime()+3600000; h<=t1; h+=3600000){ var hr=new Date(h).getHours(); if(hr%3) continue;
+    s+='<line x1="'+X(h)+'" x2="'+X(h)+'" y1="'+tp+'" y2="'+(H-b)+'" stroke="#232731" stroke-width="1"/>'+
+       '<text x="'+X(h)+'" y="'+(H-8)+'" fill="#8a909c" font-size="12" text-anchor="middle">'+pad(hr)+':00</text>'; }
+  tSeries.forEach(function(se){ if(tHidden[se.name]) return; var d='';
+    se.pts.forEach(function(p){ if(p[0]<t0) return; d+=(d?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1); });
+    if(d) s+='<path d="'+d+'" fill="none" stroke="'+se.col+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'; });
+  s+='</svg>'; box.innerHTML=s;
+  var g='';
+  tSeries.forEach(function(se,i){ var mn=99,mx=-99; se.pts.forEach(function(p){ if(p[0]>=t0){ mn=Math.min(mn,p[1]); mx=Math.max(mx,p[1]); } });
+    g+='<div data-i="'+i+'"'+(tHidden[se.name]?' class="off"':'')+'><i style="background:'+se.col+'"></i>'+esc(se.name)+'<b>'+fmtT(se.now)+'</b>'+
+      (mx>-99?'<small>'+fmtT(mn)+' – '+fmtT(mx)+'</small>':'')+'</div>'; });
+  $('tLeg').innerHTML=g;
+  Array.prototype.forEach.call($('tLeg').children,function(el){ tap(el,function(){ var n=tSeries[+el.getAttribute('data-i')].name; tHidden[n]=!tHidden[n]; drawTemps();
+    clearTimeout(tTimer); tTimer=setTimeout(closeTemps,180000); }); });
+}
+function demoHist(i){ var v=[], t=Date.now()-24*3600000, base=[20,18,17,16,18,13,7,18][i]||17;
+  for(var k=0;k<288;k++){ var tt=t+k*300000, hr=new Date(tt).getHours(); v.push({t:new Date(tt).toISOString(), v:base+Math.sin((hr-6)/24*6.28)*(i===6?3:1.5)+Math.random()*0.2}); } return {values:v}; }
 
 /* ---------- start ---------- */
 var started=false;
@@ -1029,7 +1104,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-24-v15';
+var VERSION='2026-11-25-v16';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
