@@ -79,7 +79,8 @@
   .robo .st b{display:block;font-size:15px;margin-bottom:2px;}
   .robo .st span{color:var(--mut);}
   .robo .st .warn{color:#ffb35c;}
-  .rbtns{display:grid;grid-template-columns:1fr 1fr 74px;grid-gap:8px;margin-top:10px;}
+  .rbtns{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 50px;grid-gap:6px;margin-top:10px;}
+  .rbtns .act{font-size:13px;padding:0 4px;text-align:center;line-height:1.15;}
   .rbtns .act{height:44px;}
 
   /* muziektegel */
@@ -228,6 +229,20 @@
   .radar img{width:100%;height:100%;display:block;object-fit:cover;}
   .wnote{font-size:12px;color:var(--mut);margin-top:6px;}
 
+  /* energie per apparaat */
+  .panel.epanel{width:1000px;height:720px;max-height:none;overflow:hidden;display:flex;flex-direction:column;padding:18px 20px;}
+  .epanel .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .epanel .hd h2{margin:0;} .epanel .x{font-size:16px;font-weight:500;background:rgba(255,255,255,.1);padding:10px 18px;border-radius:12px;}
+  .etop{display:flex;margin-bottom:12px;} .etop div{flex:1;background:var(--card2);border-radius:12px;padding:10px 14px;margin-right:10px;font-size:12px;color:var(--mut);}
+  .etop div:last-child{margin-right:0;} .etop b{display:block;font-size:22px;color:var(--txt);font-weight:500;margin-top:2px;}
+  .elist{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-column-gap:14px;align-content:start;flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;}
+  .er{display:flex;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line);font-size:14px;min-width:0;}
+  .er .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;} .er .nm small{color:var(--mut);margin-left:6px;font-size:11px;}
+  .er .w{width:78px;text-align:right;font-weight:600;white-space:nowrap;} .er .w.z{color:#5c6270;font-weight:400;}
+  .er .k{width:84px;text-align:right;color:var(--mut);font-size:13px;white-space:nowrap;}
+  .er.bad .w{color:#ff6b6b;}
+  .ehd{display:flex;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;padding:0 6px 4px;}
+
   /* overlays */
   .ov{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.92);display:none;z-index:10;}
   .ov.show{display:block;}
@@ -290,9 +305,8 @@
       <div class="lbl" id="roboHead"><span>Roborock</span><span>meer ›</span></div>
       <div class="robo"><div class="st" id="roboSt"><b>--</b><span></span></div></div>
       <div class="rbtns">
-        <div class="act" id="roboAll"><span class="i">🧹</span>Hele woning</div>
-        <div class="act" id="roboKitchen"><span class="i">🧽</span>Keuken dweilen</div>
-        <div class="act off" id="roboStop"><svg width="12" height="12" viewBox="0 0 12 12" style="margin-right:6px"><rect width="12" height="12" rx="2" fill="#8a90a0"/></svg>Stop</div>
+        <div class="act" data-rt="0">Alles</div><div class="act" data-rt="1">Keuken</div><div class="act" data-rt="2">Woonkamer</div><div class="act" data-rt="3">Begane grond</div>
+        <div class="act off" id="roboStop"><svg width="12" height="12" viewBox="0 0 12 12"><rect width="12" height="12" rx="2" fill="#8a90a0"/></svg></div>
       </div>
     </div>
     <div class="card grow">
@@ -310,8 +324,8 @@
 
   <!-- rechts -->
   <div class="col">
-    <div class="card grow">
-      <div class="lbl">Energie</div>
+    <div class="card grow" id="eCard">
+      <div class="lbl">Energie <span style="float:right">apparaten ›</span></div>
       <div class="pw" id="pw">-- W</div>
       <div class="pnow" id="pNow">--</div>
       <div class="chart" id="chart"></div>
@@ -388,6 +402,14 @@
   <div class="bar2"><div id="doorTitle">🔔 Er staat iemand voor de deur</div><div class="x">Sluiten</div></div><div class="live" id="liveTag">● LIVE</div>
 </div>
 
+<!-- energie per apparaat -->
+<div class="ov" id="enOv"><div class="panel epanel">
+  <div class="hd"><h2>Energie per apparaat</h2><div class="x" id="enClose">Sluiten</div></div>
+  <div class="etop" id="enTop"></div>
+  <div class="elist" id="enList"><div class="tmsg">Laden…</div></div>
+  <div class="wnote">≈ = geschat door Homey · W = nu · kWh = vandaag</div>
+</div></div>
+
 <!-- weersverwachting -->
 <div class="ov" id="wxOv"><div class="panel wpanel">
   <div class="hd"><h2>Weer · Koudekerke</h2><div class="x" id="wxClose">Sluiten</div></div>
@@ -453,7 +475,7 @@ var CFG = {
           ['Temp Wasruimte','Wasruimte'],['Temp Garage','Garage'],['Temp Domein Jes','Domein Jes']],
   mainTemp: 'Temp Woonkamer',
   p1: 'P1 Meter', prices: 'Energieprijzen', ev: 'Laadpaal',
-  robot: 'Jacqueline', robotKitchenRooms: 'keuken,washok', robotRoutine: 'Stofzuigen, dan dweilen', robotKitchenRoutine: 'Keuken dweil',
+  robot: 'Jacqueline', robotKitchenRooms: 'keuken,washok', routines: [['Stofzuigen, dan dweilen','Alles'],['Keuken dweil','Keuken'],['Woonkamer','Woonkamer'],['Begaande grond','Begane grond']],
   musicZone: 'Keuken',
   motion: 'Beweging keuken',
   lightZones: [['Woonkamer','Woonkamer'],['Keuken','Keuken'],['Garage','Garage'],['Terras','Veranda'],['Tuin','Tuin'],['Voortuin','Voortuin']],
@@ -523,9 +545,13 @@ function loadStatic(){
     api('GET','manager/logic/variable/')
   ]).then(function(r){ S.zones=r[0]||{}; S.moods=r[1]||{}; S.flows=r[2]||{}; S.vars=r[3]||{}; });
 }
+var OVR={}; // tijdelijke lokale waarden, zodat het scherm meteen klopt terwijl Sonos/Homey bijwerkt
+function ovr(d,c,v,ms){ (OVR[d.id]=OVR[d.id]||{})[c]={v:v,until:Date.now()+(ms||8000)}; if(d.capabilitiesObj && d.capabilitiesObj[c]) d.capabilitiesObj[c].value=v; }
+function applyOvr(){ var now=Date.now(); each(OVR,function(cs,id){ var d=S.devices[id]; each(cs,function(o,c){
+  if(o.until<now){ delete cs[c]; return; } if(d && d.capabilitiesObj && d.capabilitiesObj[c]){ if(d.capabilitiesObj[c].value===o.v) delete cs[c]; else d.capabilitiesObj[c].value=o.v; } }); }); }
 function loadLive(){
   return Promise.all([ api('GET','manager/devices/device/'), api('GET','manager/users/user/') ]).then(function(r){
-    S.devices=r[0]||{}; var u=[]; each(r[1]||{},function(x){u.push(x);}); S.users=u;
+    S.devices=r[0]||{}; applyOvr(); var u=[]; each(r[1]||{},function(x){u.push(x);}); S.users=u;
     renderAll();
   }).catch(function(e){ showErr('Geen verbinding met Homey: '+e.message); });
 }
@@ -817,18 +843,18 @@ function runRoutine(name){
     list.forEach(function(s){ if(!pick && String(s.name).toLowerCase()===want) pick=s; });
     if(!pick) list.forEach(function(s){ if(!pick && String(s.name).toLowerCase().indexOf(want)>=0) pick=s; });
     if(!pick) throw new Error('Routine "'+name+'" niet gevonden'+(list.length?' (wel: '+list.map(function(s){return s.name;}).join(', ')+')':''));
-    return robo('start_scene',{scene:pick},'Roborock: '+pick.name);
+    return robo('start_scene',{scene:pick},'Jacqueline: '+shortR(pick.name));
   }).catch(function(e){ showErr(e.message); });
 }
+function shortR(n){ var l=n; (CFG.routines||[]).forEach(function(r){ if(r[0].toLowerCase()===String(n).toLowerCase()) l=r[1]; }); return l; }
 function renderRoutines(){
   loadRoutines().then(function(list){
-    var h=''; list.forEach(function(s,i){ h+='<div class="chip" data-r="'+i+'">▶ '+esc(s.name)+'</div>'; });
+    var h=''; list.forEach(function(s,i){ h+='<div class="chip" data-r="'+i+'">▶ '+esc(shortR(s.name))+'</div>'; });
     $('oRout').innerHTML=h||'<span style="color:var(--mut);font-size:13px">Geen routines gevonden</span>';
     Array.prototype.forEach.call($('oRout').querySelectorAll('[data-r]'),function(el){ tap(el,function(){ var s=list[+el.getAttribute('data-r')]; runRoutine(s.name); }); });
   }).catch(function(e){ $('oRout').textContent='Fout: '+e.message; });
 }
 /* Hele woning = Roborock-routine (eerst zuigen, dan dweilen, per ruimte eigen instellingen) */
-function startRoutine(){ return runRoutine(CFG.robotRoutine); }
 function startClean(){
   if(RO.rooms==='all'){
     robo('set_clean_mode',{value:RO.mode}).then(function(){ return robo('set_suction_power',{value:RO.suck}); })
@@ -874,13 +900,14 @@ function renderMusic(){
   $('mPlay').innerHTML= pl? PAUSE : PLAY;
   var grp=groupOf(d), gv=groupVol(grp);
   $('mZone').textContent= grp.length>1 ? 'Muziek · '+grp.map(sName).join(' + ') : 'Muziek · '+sName(d).toLowerCase();
-  if(!mSliding && Date.now()>mHold && gv!==null) $('mVol').value=Math.round(gv*100);
+  if(!mSliding && gv!==null) $('mVol').value=Math.round(gv*100);
 }
 var mHold=0;
 function setVolume(d,v){ // v 0..1; bij een groep: groepsvolume voor alle gekoppelde boxen
   var grp=groupOf(d);
-  grp.forEach(function(o){ if(o.capabilitiesObj.volume_set) o.capabilitiesObj.volume_set.value=v; });
-  mHold=Date.now()+6000;
+  var gv=groupVol(grp);
+  grp.forEach(function(o){ var ov=cap(o,'volume_set'); if(ov===null) return; // groepsvolume schaalt alle boxen mee
+    ovr(o,'volume_set', grp.length>1 && gv ? Math.max(0,Math.min(1,ov*v/gv)) : v, 6000); });
   var p = grp.length>1 ? runCard(d.id,'set_group_volume',{volume:Math.max(1,Math.round(v*100))}) : setCap(d.id,'volume_set',v);
   return p.then(function(){ setTimeout(loadLive,2000); }).catch(function(e){ showErr(sName(d)+': '+e.message); });
 }
@@ -891,7 +918,7 @@ function rangeHandler(rg, onStart, onSet){ // betrouwbare schuif op iOS 12: tijd
   function end(){ setTimeout(function(){ onStart(false); },300); if(tmr) fire(); }
   rg.addEventListener('touchstart',start,{passive:true}); rg.addEventListener('mousedown',start);
   rg.addEventListener('touchend',end); rg.addEventListener('touchcancel',end); rg.addEventListener('mouseup',end);
-  rg.addEventListener('input',function(){ clearTimeout(tmr); tmr=setTimeout(fire,350); });
+  rg.addEventListener('input',function(){ clearTimeout(tmr); tmr=setTimeout(fire,250); });
   rg.addEventListener('change',function(){ fire(); onStart(false); });
 }
 var mSliding=false;
@@ -932,24 +959,30 @@ function bindCards(root){
     Array.prototype.forEach.call(el.querySelectorAll('.ctl'),function(b){ tap(b,function(){ spk(S.devices[did]||d,b.getAttribute('data-a')); }); });
     Array.prototype.forEach.call(el.querySelectorAll('[data-j]'),function(c){ tap(c,function(){ toggleGroup(S.devices[did]||d, S.devices[c.getAttribute('data-j')]); }); });
     var rg=el.querySelector('input');
-    if(rg) rangeHandler(rg, function(s){ sliding=s; }, function(v){ d=S.devices[did]||d; d.capabilitiesObj.volume_set.value=v; mHold=Date.now()+6000;
+    if(rg) rangeHandler(rg, function(s){ sliding=s; }, function(v){ d=S.devices[did]||d; ovr(d,'volume_set',v,6000);
         setCap(d.id,'volume_set',v).then(function(){ setTimeout(loadLive,2000); }).catch(function(e){ showErr(d.name+': '+e.message); }); });
   });
 }
 function toggleGroup(host, other){
   if(!host||!other) return;
   var g=cap(host,'sonos_group')||'', inG = g && (cap(other,'sonos_group')||'')===g, p;
-  if(inG){ toast(sName(other)+' uit de groep'); p=runCard(other.id,'cloud_leave_current_group',{}); }
+  if(inG){ toast(sName(other)+' uit de groep'); ovr(other,'sonos_group',sName(other)+'*'); p=runCard(other.id,'cloud_leave_current_group',{}); }
   else {
     // altijd aansluiten bij de groep die muziek speelt, zodat de muziek niet stopt
     var a=host, b=other; if(!cap(host,'speaker_playing') && cap(other,'speaker_playing')){ a=other; b=host; }
-    toast(sName(b)+' speelt mee met '+sName(a)); p=runCard(b.id,'cloud_join_player',{player:{id:a.id,name:a.name}});
+    toast(sName(b)+' speelt mee met '+sName(a));
+    var ag=cap(a,'sonos_group')||sName(a), m=/ \+ (\d+)$/.exec(ag), ng= m ? ag.replace(/\d+$/, String(+m[1]+1)) : ag+' + 1';
+    groupOf(a).forEach(function(o){ ovr(o,'sonos_group',ng); }); ovr(b,'sonos_group',ng);
+    if(cap(a,'speaker_playing')) ovr(b,'speaker_playing',true);
+    var av=cap(a,'volume_set'); if(av!==null && cap(b,'volume_set')!==null) ovr(b,'volume_set',av,8000);
+    p=runCard(b.id,'cloud_join_player',{player:{id:a.id,name:a.name}}).then(function(){ if(av!==null) return setCap(b.id,'volume_set',av); });
   }
-  p.then(function(){ setTimeout(loadLive,2500); setTimeout(loadLive,6000); setTimeout(loadLive,10000); }).catch(function(e){ showErr('Sonos: '+e.message); });
+  lastBig=''; renderPlayers(); renderMusic();
+  p.then(function(){ setTimeout(loadLive,1500); setTimeout(loadLive,4000); setTimeout(loadLive,9000); }).catch(function(e){ OVR={}; showErr('Sonos: '+e.message); loadLive(); });
 }
 var lastBig='', lastSmall='';
 function renderPlayers(){
-  if(sliding || Date.now()<mHold) return;
+  if(sliding) return;
   var big='', small='', m=musicDev();
   var son=sonosList(); son.sort(function(a,b){ return a===m?-1:(b===m?1:(a.name<b.name?-1:1)); });
   son.forEach(function(d){ big+=plCard(d,true); });
@@ -1110,8 +1143,8 @@ tap($('night'),function(){ store.set('kookPrev',''); renderActs(); triggerFlow(C
 tap($('alloff'),function(){ store.set('kookPrev',''); renderActs(); triggerFlow(CFG.allOffFlow,'Alle lampen uit'); });
 tap($('garland'),toggleGarland);
 Array.prototype.forEach.call(document.querySelectorAll('[data-mood]'),function(el){ tap(el,function(){ setMood(el.getAttribute('data-mood')); }); });
-tap($('roboAll'),startRoutine);
-tap($('roboKitchen'),function(){ runRoutine(CFG.robotKitchenRoutine); });
+Array.prototype.forEach.call(document.querySelectorAll('[data-rt]'),function(el){ var r=CFG.routines[+el.getAttribute('data-rt')];
+  if(!r){ el.style.display='none'; return; } el.innerHTML=esc(r[1]); tap(el,function(){ runRoutine(r[0]); }); });
 tap($('roboStop'),function(){ robo('stop_clean',{},'Roborock stopt').then(function(){ return robo('dock',{}); }); });
 tap($('mPrev'),function(){ spk(musicDev(),'prev'); });
 tap($('mNext'),function(){ spk(musicDev(),'next'); });
@@ -1136,12 +1169,61 @@ tap($('rWash'),function(){ robo('wash_mop',{},'Dweil wassen'); });
 tap($('door'),hideDoor);
 tap($('tempCard'),openTemps);
 tap($('clockCard'),openWx);
+tap($('eCard'),openEn);
+tap($('enClose'),closeEn);
+tap($('enOv'),closeEn);
+tap(document.querySelector('.epanel'),function(){});
 tap($('wxClose'),closeWx);
 tap($('wxOv'),closeWx);
 tap(document.querySelector('.wpanel'),function(){});
 tap($('tClose'),closeTemps);
 tap($('tempOv'),closeTemps);
 tap(document.querySelector('.tpanel'),function(){});
+
+/* ---------- energie per apparaat ---------- */
+var enTimer=null, enRefresh=null;
+function openEn(){ $('enOv').className='ov show'; $('enList').innerHTML='<div class="tmsg">Laden…</div>'; $('enTop').innerHTML='';
+  loadEn(); clearInterval(enRefresh); enRefresh=setInterval(loadEn,15000); clearTimeout(enTimer); enTimer=setTimeout(closeEn,180000); }
+function closeEn(){ $('enOv').className='ov'; clearInterval(enRefresh); clearTimeout(enTimer); }
+function liveTree(zone, out, zname){ // live vermogen per apparaat, zone voor zone
+  return api('GET','manager/energy/live'+(zone?'?zone='+zone:'')).then(function(r){
+    var subs=[]; ((r&&r.items)||[]).forEach(function(i){
+      if(i.type==='zone') subs.push(liveTree(i.id,out,i.name));
+      else out[i.id]={name:i.name, W:i.values?i.values.W:null, zone:zname||'', type:i.type}; });
+    return Promise.all(subs).then(function(){ return r; });
+  });
+}
+function loadEn(){
+  if(DEMO){ renderEn(demoEn()); return; }
+  var live={}, d=new Date(), day=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  Promise.all([ liveTree(null,live), api('GET','manager/energy/report/day?date='+day) ]).then(function(r){ renderEn({root:r[0], live:live, rep:r[1]}); })
+  .catch(function(e){ $('enList').innerHTML='<div class="tmsg">Kan energiegegevens niet ophalen.<br>'+esc(e.message)+
+     (/40[13]/.test(e.message)?'<br><br>De API-sleutel van het dashboard mist nog het recht <b>Energie</b>.':'')+'</div>'; });
+}
+function renderEn(x){
+  var el=(x.rep&&x.rep.electricity)||{}, cons=(el.devices&&el.devices.consumed)||{}, rows={}, skip=/P1 Meter|Σ/;
+  each(x.live,function(v,id){ if(v.type!=='device' || skip.test(v.name)) return; rows[id]={name:v.name, zone:v.zone, W:v.W, kwh:null, approx:false}; });
+  each(cons,function(v,id){ if(skip.test(v.name)) return; var r=rows[id]||(rows[id]={name:v.name, zone:'', W:null}); r.kwh=v.period; r.approx=!!v.approximatedEnergy; });
+  var list=[]; each(rows,function(r){ list.push(r); });
+  list.sort(function(a,b){ return (b.W||0)-(a.W||0) || (b.kwh||0)-(a.kwh||0); });
+  var p1=byName(CFG.p1), net=cap(p1,'measure_power');
+  $('enTop').innerHTML='<div>Nu van/naar net<b>'+(net===null?'--':Math.round(net)+' W')+'</b></div>'+
+    '<div>Afgenomen vandaag<b>'+nf(el.importedPeriod,1)+' kWh</b></div>'+
+    '<div>Teruggeleverd vandaag<b>'+nf(el.exportedPeriod,1)+' kWh</b></div>'+
+    '<div>Apparaten actief<b>'+list.filter(function(r){ return (r.W||0)>0; }).length+'</b></div>';
+  var half=Math.ceil(list.length/2), seq=[]; for(var i=0;i<half;i++){ seq.push(list[i]); if(i+half<list.length) seq.push(list[i+half]); }
+  var h='<div class="ehd"><span style="flex:1">Apparaat</span><span style="width:78px;text-align:right">Nu</span><span style="width:84px;text-align:right">Vandaag</span></div>';
+  h+=h.replace('class="ehd"','class="ehd" style="visibility:visible"');
+  seq.forEach(function(r){ var w=r.W, bad=w>5000;
+    h+='<div class="er'+(bad?' bad':'')+'"><span class="nm">'+(r.approx?'≈ ':'')+esc(r.name)+(r.zone?'<small>'+esc(r.zone)+'</small>':'')+'</span>'+
+      '<span class="w'+(w>0?'':' z')+'">'+(w===null||w===undefined?'–':(w>=1000?nf(w/1000,1)+' kW':Math.round(w)+' W'))+(bad?' ⚠︎':'')+'</span>'+
+      '<span class="k">'+(r.kwh===null||r.kwh===undefined?'–':nf(r.kwh,2)+' kWh')+'</span></div>'; });
+  $('enList').innerHTML= list.length? h : '<div class="tmsg">Geen verbruik gevonden</div>';
+}
+function demoEn(){ var live={}, n=0; function L(nm,z,w){ live['x'+(++n)]={name:nm,zone:z,W:w,type:'device'}; }
+  L('Airco woonkamer','Woonkamer',661); L('Lamp garage','Garage',61); L('Koelkast','Keuken',85); L('Lamp keuken 1','Keuken',7); L('Airco slaapkamer','Slaapkamer',1.3); L('Fietsenlader','Garage',0); L('Lamp hoek kantoor','Kantoor',28000);
+  var cons={x1:{name:'Airco woonkamer',period:3.2},x2:{name:'Lamp garage',period:0.4},x3:{name:'Koelkast',period:0.9,approximatedEnergy:true},x4:{name:'Lamp keuken 1',period:0.05,approximatedEnergy:true},x5:{name:'Airco slaapkamer',period:0.73},x6:{name:'Fietsenlader',period:0.21},x7:{name:'Lamp hoek kantoor',period:377.8,approximatedEnergy:true}};
+  return {live:live, rep:{electricity:{importedPeriod:6.4,exportedPeriod:1.2,devices:{consumed:cons}}}}; }
 
 /* ---------- weersverwachting (Koudekerke) ---------- */
 var wxTimer=null;
@@ -1257,7 +1339,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-26-v20';
+var VERSION='2026-11-26-v22';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
