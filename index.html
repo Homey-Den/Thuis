@@ -246,6 +246,15 @@
   .ef:last-child{margin-right:0;} .ef span{display:block;font-size:14px;color:var(--mut);} .ef b{display:block;font-size:34px;font-weight:400;margin:2px 0;} .ef small{font-size:13px;color:var(--mut);}
   .ehd{display:flex;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;padding:0 6px 4px;}
 
+  /* alarmstatus */
+  .alst{float:right;text-transform:none;letter-spacing:0;font-weight:600;padding:2px 8px;border-radius:8px;margin-top:-3px;}
+  .alst.uit{color:#8a90a0;background:#252a33;} .alst.aan{color:#ffd0d0;background:#6b1d24;} .alst.vertrek,.alst.binnenkomst{color:#1a1300;background:#f2a93b;}
+  .ov.arm{z-index:25;background:rgba(150,80,0,.95);text-align:center;}
+  .ov.arm.ok{background:rgba(20,110,60,.95);}
+  .arm .ai{font-size:90px;margin-top:120px;} .arm h1{font-size:46px;margin:12px 0 8px;} .arm p{font-size:22px;opacity:.9;margin:0;}
+  .arm .cd{font-size:120px;font-weight:200;margin-top:16px;}
+  .arm .hide{display:inline-block;margin-top:30px;font-size:17px;background:rgba(255,255,255,.18);padding:12px 26px;border-radius:12px;}
+
   /* alarm */
   @-webkit-keyframes alflash{0%,100%{background:#b00010;}50%{background:#2a0004;}}
   @keyframes alflash{0%,100%{background:#b00010;}50%{background:#2a0004;}}
@@ -287,7 +296,7 @@
       <div class="fc" id="fc"></div>
     </div>
     <div class="card">
-      <div class="lbl">Thuis</div>
+      <div class="lbl">Thuis <span id="alState" class="alst"></span></div>
       <div id="ppl"></div>
     </div>
     <div class="card grow" id="tempCard">
@@ -315,7 +324,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="lbl" id="roboHead"><span>Roborock</span><span>meer ›</span></div>
+      <div class="lbl" id="roboHead"><span>Jacqueline</span><span>meer ›</span></div>
       <div class="robo"><div class="st" id="roboSt"><b>--</b><span></span></div></div>
       <div class="rbtns">
         <div class="act" data-rt="0">Alles</div><div class="act" data-rt="1">Keuken</div><div class="act" data-rt="2">Woonkamer</div><div class="act" data-rt="3">Begane grond</div>
@@ -368,7 +377,7 @@
 
 <!-- ================= SCHERM 3: ROBOROCK ================= -->
 <div class="screen" id="scr3"><div class="s3">
-  <div class="s2head"><div class="back" id="back3">‹ Thuis</div><h1>Roborock · Jacqueline</h1></div>
+  <div class="s2head"><div class="back" id="back3">‹ Thuis</div><h1>Jacqueline</h1></div>
   <div class="body">
     <div class="mapc"><img id="rMap" alt=""><div class="tag">Kaart</div></div>
     <div class="rside">
@@ -425,6 +434,9 @@
   <div class="elist" id="enList"><div class="tmsg">Laden…</div></div>
   <div class="wnote">≈ = geschat door Homey · W = nu · kWh = vandaag</div>
 </div></div>
+
+<!-- alarm in-/uitschakelen -->
+<div class="ov arm" id="armOv"><div class="ai" id="armIc">🔒</div><h1 id="armT"></h1><p id="armP"></p><div class="cd" id="armCd"></div><div class="hide" id="armHide">Verbergen</div></div>
 
 <!-- alarm -->
 <div class="ov alarm" id="alarmOv">
@@ -491,7 +503,7 @@ var CFG = {
   garland: 'Lampjes voortuin',
   garlandOnFlow: 'Voortuin - Lampjes aan (dashboard)',
   garlandOffFlow: 'Voortuin - Lampjes uit (dashboard + 23:00)',
-  doorbellVar: 'Deurbel', alarmVar: 'Alarm', sirenVol: 70, sirenMin: 5,
+  doorbellVar: 'Deurbel', alarmVar: 'Alarm', alarmStatusVar: 'Alarm status', exitDelay: 60, entryDelay: 5, sirenVol: 70, sirenMin: 5,
   doorbellDevice: 'voordeur',
   doorShowSec: 60,
   temps: [['Temp Keuken','Keuken'],['Temp Entree','Entree'],['Temp Slaapkamer','Slaapkamer'],['Temp Kantoor','Kantoor'],
@@ -882,14 +894,14 @@ function startClean(){
   if(RO.rooms==='all'){
     robo('set_clean_mode',{value:RO.mode}).then(function(){ return robo('set_suction_power',{value:RO.suck}); })
       .then(function(){ return robo('set_scrub_intensity',{value:RO.water}); })
-      .then(function(){ return robo('clean_all',{},'Roborock: hele woning'); });
-  } else robo('clean_rooms_with_config',{rooms:RO.rooms,repeat:1,clean_mode:RO.mode,suction_power:RO.suck,scrub_intensity:RO.water,mop_route:'300'},'Roborock: '+RO.rooms);
+      .then(function(){ return robo('clean_all',{},'Jacqueline: hele woning'); });
+  } else robo('clean_rooms_with_config',{rooms:RO.rooms,repeat:1,clean_mode:RO.mode,suction_power:RO.suck,scrub_intensity:RO.water,mop_route:'300'},'Jacqueline: '+RO.rooms);
 }
 function fmtMin(v){ return v===null||v===undefined?'--':Math.round(v*60)+' min'; }
 function robo(card,args,msg){
-  var r=byName(CFG.robot); if(!r){ showErr('Roborock niet gevonden'); return Promise.resolve(); }
+  var r=byName(CFG.robot); if(!r){ showErr('Jacqueline niet gevonden'); return Promise.resolve(); }
   if(msg) toast(msg);
-  return runCard(r.id,card,args).then(function(){ setTimeout(loadLive,2500); }).catch(function(e){ showErr('Roborock: '+e.message); });
+  return runCard(r.id,card,args).then(function(){ setTimeout(loadLive,2500); }).catch(function(e){ showErr('Jacqueline: '+e.message); });
 }
 
 /* ---------- muziek ---------- */
@@ -1155,12 +1167,40 @@ function pollDoorbell(){
 /* ---------- alarm ---------- */
 var alarmOn='', alBusy=false, sirenT=null, sirenUntil=0, alMuted=false;
 function pollAlarm(){
-  var id=varId(CFG.alarmVar); if(!id||alBusy) return;
-  alBusy=true;
-  api('GET','manager/logic/variable/'+id).then(function(v){ var s=(v&&v.value)||'';
+  if(alBusy) return; alBusy=true;
+  api('GET','manager/logic/variable/').then(function(all){ if(all) S.vars=all;
+    var a=null, st=null; each(all||{},function(v){ if(v.name===CFG.alarmVar) a=v; if(v.name===CFG.alarmStatusVar) st=v; });
+    var s=(a&&a.value)||'';
     if(s && s!==alarmOn) showAlarm(s); else if(!s && alarmOn) hideAlarm();
+    if(st) armState(String(st.value||'uit'));
   }).catch(function(){}).then(function(){ alBusy=false; });
 }
+/* in-/uitschakelen: status uit | vertrek | aan | binnenkomst */
+var armSt=null, armSince=0, armTimer=null, armHidden=false;
+function armState(s){
+  if(s===armSt) return;
+  var prev=armSt; armSt=s; armSince=Date.now(); armHidden=false;
+  var lbl={uit:'🔓 Alarm uit',aan:'🔒 Alarm aan',vertrek:'⏳ Alarm gaat aan',binnenkomst:'⚠︎ Binnenkomst'}[s]||s;
+  var e=$('alState'); e.textContent=lbl; e.className='alst '+s;
+  clearInterval(armTimer);
+  if(s==='vertrek' || s==='binnenkomst'){ wake(); armTimer=setInterval(armTick,250); armTick(); }
+  else if(s==='uit' && (prev==='binnenkomst' || prev==='aan' || prev==='vertrek') && prev!==null){
+    armShow('ok','🔓','Alarm uitgeschakeld', prev==='vertrek'?'Inschakelen geannuleerd':'Welkom', '');
+    armTimer=setTimeout(armClose,4000);
+  } else armClose();
+}
+function armTick(){
+  var dur = armSt==='vertrek' ? CFG.exitDelay : CFG.entryDelay, left=Math.max(0, Math.ceil(dur-(Date.now()-armSince)/1000));
+  if(armHidden){ $('alState').textContent=(armSt==='vertrek'?'⏳ Alarm over ':'⚠︎ ')+left+' s'; return; }
+  if(armSt==='vertrek') armShow('', '🔒','Alarm wordt ingeschakeld','Verlaat het huis en sluit de deur',left);
+  else armShow('', '⚠︎','Schakel het alarm uit','Druk op ▢ op de sleutelhanger',left);
+  if(left<=0) clearInterval(armTimer);
+}
+function armShow(cls,ic,t,p,cd){ $('armIc').textContent=ic; $('armT').textContent=t; $('armP').textContent=p; $('armCd').textContent=cd===''?'':cd;
+  $('armHide').style.display= cls==='ok' ? 'none' : ''; $('armOv').className='ov arm show'+(cls?' '+cls:''); }
+function armClose(){ $('armOv').className='ov arm'; }
+tap($('armHide'),function(){ armHidden=true; armClose(); });
+tap($('armOv'),function(){ if(armSt==='uit') armClose(); });
 function showAlarm(s){
   alarmOn=s; alMuted=false; wake();
   var smoke=/rook/i.test(s);
@@ -1201,7 +1241,7 @@ tap($('garland'),toggleGarland);
 Array.prototype.forEach.call(document.querySelectorAll('[data-mood]'),function(el){ tap(el,function(){ setMood(el.getAttribute('data-mood')); }); });
 Array.prototype.forEach.call(document.querySelectorAll('[data-rt]'),function(el){ var r=CFG.routines[+el.getAttribute('data-rt')];
   if(!r){ el.style.display='none'; return; } el.innerHTML=esc(r[1]); tap(el,function(){ runRoutine(r[0]); }); });
-tap($('roboStop'),function(){ robo('stop_clean',{},'Roborock stopt').then(function(){ return robo('dock',{}); }); });
+tap($('roboStop'),function(){ robo('stop_clean',{},'Jacqueline stopt').then(function(){ return robo('dock',{}); }); });
 tap($('mPrev'),function(){ spk(musicDev(),'prev'); });
 tap($('mNext'),function(){ spk(musicDev(),'next'); });
 tap($('mPlay'),function(){ spk(musicDev(),'play'); });
@@ -1409,14 +1449,17 @@ tick(); setInterval(tick,10000);
 loadWeather(); setInterval(loadWeather, 30*60*1000);
 start();
 var bootT=Date.now();
-setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
+// elke 3 uur verversen, maar alleen als de pagina online echt bereikbaar is (anders blijft het scherm leeg zonder internet)
+setInterval(function(){ if(doorOpen || alarmOn || Date.now()-bootT < 3*3600000) return;
+  fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
+  .then(function(t){ if(t && t.indexOf('var VERSION=')>=0) location.reload(); }).catch(function(){}); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-26-v28';
+var VERSION='2026-11-26-v31';
 try{ document.getElementById('ver').textContent=VERSION.replace(/^\d{4}-/,''); }catch(e){}
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
-    var m=/var VERSION='([^']+)'/.exec(t); if(m && m[1]!==VERSION) location.reload();
+    var m=/var VERSION='([^']+)'/.exec(t); if(m && m[1]!==VERSION && !alarmOn) location.reload();
   }).catch(function(){});
 }, 5*60000);
 
