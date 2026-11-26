@@ -296,7 +296,7 @@
       </div>
     </div>
     <div class="card grow">
-      <div class="lbl"><span>Muziek · keuken</span><span>alle spelers ›</span></div>
+      <div class="lbl" id="mHead"><span id="mZone">Muziek · keuken</span><span>alle spelers ›</span></div>
       <div class="music" id="musicTile">
         <div class="art" id="mArt">♪</div>
         <div class="mt" id="mText"><b>--</b><span></span></div>
@@ -856,6 +856,14 @@ function trackOf(d){
   if(a==='Homey') a='';
   return {t:t, a:a||cap(d,'speaker_album')||''};
 }
+function sName(d){ return String(d.name).replace('Sonos ',''); }
+function groupOf(d){ // alle Sonos-spelers in dezelfde groep (incl. d zelf)
+  var g=cap(d,'sonos_group')||'', out=[];
+  if(!g || g.indexOf(' + ')<0) return [d];
+  sonosList().forEach(function(o){ if((cap(o,'sonos_group')||'')===g) out.push(o); });
+  return out.length?out:[d];
+}
+function groupVol(list){ var s=0,n=0; list.forEach(function(o){ var v=cap(o,'volume_set'); if(v!==null){ s+=v; n++; } }); return n? s/n : null; }
 function renderMusic(){
   var d=musicDev();
   if(!d){ $('mText').innerHTML='<b>Sonos keuken niet gevonden</b>'; return; }
@@ -864,14 +872,30 @@ function renderMusic(){
   $('mArt').style.backgroundImage= (u && pl!==false && tr.a) ? 'url("'+u+'")' : '';
   $('mArt').textContent= (u && tr.a) ? '' : '♪';
   $('mPlay').innerHTML= pl? PAUSE : PLAY;
-  if(!mSliding && cap(d,'volume_set')!==null) $('mVol').value=Math.round(cap(d,'volume_set')*100);
+  var grp=groupOf(d), gv=groupVol(grp);
+  $('mZone').textContent= grp.length>1 ? 'Muziek · '+grp.map(sName).join(' + ') : 'Muziek · '+sName(d).toLowerCase();
+  if(!mSliding && Date.now()>mHold && gv!==null) $('mVol').value=Math.round(gv*100);
+}
+var mHold=0;
+function setVolume(d,v){ // v 0..1; bij een groep: groepsvolume voor alle gekoppelde boxen
+  var grp=groupOf(d);
+  grp.forEach(function(o){ if(o.capabilitiesObj.volume_set) o.capabilitiesObj.volume_set.value=v; });
+  mHold=Date.now()+6000;
+  var p = grp.length>1 ? runCard(d.id,'set_group_volume',{volume:Math.max(1,Math.round(v*100))}) : setCap(d.id,'volume_set',v);
+  return p.then(function(){ setTimeout(loadLive,2000); }).catch(function(e){ showErr(sName(d)+': '+e.message); });
+}
+function rangeHandler(rg, onStart, onSet){ // betrouwbare schuif op iOS 12: tijdens slepen bijwerken, met vertraging
+  var tmr=null;
+  function fire(){ clearTimeout(tmr); tmr=null; onSet(rg.value/100); }
+  function start(){ onStart(true); }
+  function end(){ setTimeout(function(){ onStart(false); },300); if(tmr) fire(); }
+  rg.addEventListener('touchstart',start,{passive:true}); rg.addEventListener('mousedown',start);
+  rg.addEventListener('touchend',end); rg.addEventListener('touchcancel',end); rg.addEventListener('mouseup',end);
+  rg.addEventListener('input',function(){ clearTimeout(tmr); tmr=setTimeout(fire,350); });
+  rg.addEventListener('change',function(){ fire(); onStart(false); });
 }
 var mSliding=false;
-(function(){ var rg=$('mVol');
-  rg.addEventListener('touchstart',function(){ mSliding=true; },{passive:true}); rg.addEventListener('mousedown',function(){ mSliding=true; });
-  rg.addEventListener('change',function(){ mSliding=false; var d=musicDev(); if(!d) return; var v=rg.value/100;
-    d.capabilitiesObj.volume_set.value=v; setCap(d.id,'volume_set',v).catch(function(e){ showErr(e.message); }); });
-})();
+rangeHandler($('mVol'), function(s){ mSliding=s; }, function(v){ var d=musicDev(); if(d) setVolume(d,v); });
 function spk(d,act){
   if(!d) return;
   var p;
@@ -908,23 +932,24 @@ function bindCards(root){
     Array.prototype.forEach.call(el.querySelectorAll('.ctl'),function(b){ tap(b,function(){ spk(S.devices[did]||d,b.getAttribute('data-a')); }); });
     Array.prototype.forEach.call(el.querySelectorAll('[data-j]'),function(c){ tap(c,function(){ toggleGroup(S.devices[did]||d, S.devices[c.getAttribute('data-j')]); }); });
     var rg=el.querySelector('input');
-    if(rg){
-      rg.addEventListener('touchstart',function(){sliding=true;},{passive:true}); rg.addEventListener('mousedown',function(){sliding=true;});
-      rg.addEventListener('change',function(){ sliding=false; var v=rg.value/100; d=S.devices[did]||d; d.capabilitiesObj.volume_set.value=v;
-        setCap(d.id,'volume_set',v).catch(function(e){ showErr(d.name+': '+e.message); }); });
-    }
+    if(rg) rangeHandler(rg, function(s){ sliding=s; }, function(v){ d=S.devices[did]||d; d.capabilitiesObj.volume_set.value=v; mHold=Date.now()+6000;
+        setCap(d.id,'volume_set',v).then(function(){ setTimeout(loadLive,2000); }).catch(function(e){ showErr(d.name+': '+e.message); }); });
   });
 }
 function toggleGroup(host, other){
   if(!host||!other) return;
   var g=cap(host,'sonos_group')||'', inG = g && (cap(other,'sonos_group')||'')===g, p;
-  if(inG){ toast(other.name+' uit de groep'); p=runCard(other.id,'cloud_leave_current_group',{}); }
-  else { toast(other.name+' toegevoegd aan '+host.name); p=runCard(other.id,'cloud_join_player',{player:{id:host.id,name:host.name}}); }
+  if(inG){ toast(sName(other)+' uit de groep'); p=runCard(other.id,'cloud_leave_current_group',{}); }
+  else {
+    // altijd aansluiten bij de groep die muziek speelt, zodat de muziek niet stopt
+    var a=host, b=other; if(!cap(host,'speaker_playing') && cap(other,'speaker_playing')){ a=other; b=host; }
+    toast(sName(b)+' speelt mee met '+sName(a)); p=runCard(b.id,'cloud_join_player',{player:{id:a.id,name:a.name}});
+  }
   p.then(function(){ setTimeout(loadLive,2500); setTimeout(loadLive,6000); setTimeout(loadLive,10000); }).catch(function(e){ showErr('Sonos: '+e.message); });
 }
 var lastBig='', lastSmall='';
 function renderPlayers(){
-  if(sliding) return;
+  if(sliding || Date.now()<mHold) return;
   var big='', small='', m=musicDev();
   var son=sonosList(); son.sort(function(a,b){ return a===m?-1:(b===m?1:(a.name<b.name?-1:1)); });
   son.forEach(function(d){ big+=plCard(d,true); });
@@ -1093,6 +1118,7 @@ tap($('mNext'),function(){ spk(musicDev(),'next'); });
 tap($('mPlay'),function(){ spk(musicDev(),'play'); });
 tap($('mArt'),function(){ go(2); });
 tap($('mText'),function(){ go(2); });
+tap($('mHead'),function(){ go(2); });
 tap($('back'),function(){ go(1); });
 tap($('back3'),function(){ go(1); });
 tap($('back4'),function(){ go(1); });
@@ -1231,7 +1257,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-26-v19';
+var VERSION='2026-11-26-v20';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
@@ -1266,7 +1292,7 @@ function demoApi(method,path){
     var jr=C('Jacqueline',{is_cleaning:false,dock:true,measure_battery:100,battery_charging_state:'charging',clean_area:51.9,clean_time:0.97,mop_attached:true,clean_room_pick:null}); jr.capabilitiesObj.clean_room_pick.values=[{id:'1',title:'woonkamer'},{id:'2',title:'keuken'}];
     var sp=[['Keuken','com.sonos',true,'Mr. Brightside','The Killers','z2'],['Sonos Woonkamer','com.sonos',false,'Homey',null,'z1'],['Sonos Badkamer','com.sonos',false,null,null,'x'],
             ['Chromecast woonkamer','chromecast',false,'Idle','','x'],['Chromecast veranda','chromecast',false,'YouTube','YouTube','x'],['Speaker garage','chromecast',true,'Er is maar één NPO Radio 2','NPO Radio 2','x'],['Home pod','homepod',false,'NPO Radio 2','AirMusic','x']];
-    sp.forEach(function(s){ C(s[0],{speaker_playing:s[2],speaker_track:s[3],speaker_artist:s[4],speaker_next:null,speaker_prev:null,volume_set:0.3},{'class':'speaker',driverId:'homey:app:'+s[1]+':x',zone:s[5]}); });
+    sp.forEach(function(s){ C(s[0],{speaker_playing:s[2],speaker_track:s[3],speaker_artist:s[4],speaker_next:null,speaker_prev:null,volume_set:0.3,sonos_group:(s[0]==='Keuken'||s[0]==='Sonos Woonkamer')?'Keuken + 1':(s[1]==='com.sonos'?s[0]:null)},{'class':'speaker',driverId:'homey:app:'+s[1]+':x',zone:s[5]}); });
     return D;
   }
   return {};
