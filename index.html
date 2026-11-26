@@ -124,18 +124,20 @@
   .players.small .ctl{width:30px;height:30px;} .players.small .ctl.big{width:34px;height:34px;}
   .players.small .ctl svg{width:13px;height:13px;}
   .grp{display:flex;flex-wrap:wrap;align-items:center;margin-top:10px;font-size:12px;color:var(--mut);}
-  .grp .chip{padding:5px 10px;font-size:12px;margin:3px 4px 0 0;}
+  .grp .chip{padding:9px 14px;font-size:14px;margin:4px 6px 0 0;}
   .grp .chip.in{background:#2f6d4a;color:#d8ffe6;}
   .mvol{display:flex;align-items:center;margin-top:8px;}
   .mvol span{font-size:13px;color:var(--mut);width:28px;}
   .mvol input{flex:1;height:26px;}
   .s3{height:100%;padding:12px 14px;display:flex;flex-direction:column;}
   .s3 .body{flex:1;min-height:0;display:flex;margin-top:4px;}
-  .mapc{background:#fff;border-radius:16px;flex:0 0 470px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+  .mapc{background:#fff;border-radius:16px;flex:0 0 400px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
   .mapc img{max-width:100%;max-height:100%;}
   .mapc .tag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;padding:3px 8px;border-radius:8px;font-size:12px;}
   .rside{flex:1;margin-left:12px;display:flex;flex-direction:column;min-width:0;}
-  .rside .card + .card{margin-top:10px;}
+  .rside .card + .card{margin-top:8px;}
+  .rside .card{padding-top:10px;padding-bottom:10px;}
+  #oRout .chip{padding:7px 11px;font-size:13px;}
   .opts{display:flex;flex-wrap:wrap;margin:-3px;}
   .opts .chip{margin:3px;padding:8px 12px;font-size:13px;}
   .olbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:8px 0 4px;}
@@ -200,6 +202,31 @@
   .tleg b{font-weight:600;margin-left:8px;}
   .tleg small{color:var(--mut);margin-left:6px;font-size:12px;}
   .tmsg{color:var(--mut);font-size:17px;padding:40px;text-align:center;}
+
+  /* weerscherm */
+  .panel.wpanel{width:1000px;height:720px;max-height:none;overflow:hidden;display:flex;flex-direction:column;padding:18px 20px;}
+  .wpanel .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .wpanel .hd h2{margin:0;}
+  .wpanel .x{font-size:16px;font-weight:500;background:rgba(255,255,255,.1);padding:10px 18px;border-radius:12px;}
+  .wbody{display:flex;flex:1;min-height:0;}
+  .wleft{flex:1;min-width:0;margin-right:16px;display:flex;flex-direction:column;}
+  .wright{width:340px;display:flex;flex-direction:column;}
+  .wsec{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:2px 0 6px;}
+  .hrs{display:flex;background:var(--card2);border-radius:14px;padding:8px 4px;margin-bottom:12px;}
+  .hrs div{flex:1;text-align:center;font-size:12px;color:var(--mut);}
+  .hrs i{display:block;font-style:normal;font-size:20px;margin:3px 0;}
+  .hrs b{display:block;font-size:15px;color:var(--txt);font-weight:600;}
+  .hrs small{display:block;font-size:11px;margin-top:2px;color:#5ac8fa;min-height:13px;}
+  .days{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-column-gap:12px;align-content:start;}
+  .dy{display:flex;align-items:center;font-size:15px;padding:16px 8px;border-bottom:1px solid var(--line);min-width:0;}
+  .dy .n{width:80px;color:var(--mut);} .dy .n b{color:var(--txt);font-weight:600;}
+  .dy i{font-style:normal;font-size:19px;width:30px;}
+  .dy .tt{width:76px;} .dy .tt b{font-weight:600;} .dy .tt span{color:var(--mut);}
+  .dy .rn{color:#5ac8fa;font-size:12px;width:56px;white-space:nowrap;} .dy .wd{color:var(--mut);font-size:12px;flex:1;text-align:right;white-space:nowrap;}
+  .dy .n,.dy .tt{white-space:nowrap;}
+  .radar{width:340px;height:340px;border-radius:14px;overflow:hidden;background:#000;}
+  .radar img{width:100%;height:100%;display:block;object-fit:cover;}
+  .wnote{font-size:12px;color:var(--mut);margin-top:6px;}
 
   /* overlays */
   .ov{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.92);display:none;z-index:10;}
@@ -322,6 +349,10 @@
         <div class="rstat" style="margin-top:8px" id="rStat"></div>
       </div>
       <div class="card">
+        <div class="lbl">Routines</div>
+        <div class="opts" id="oRout"><span style="color:var(--mut);font-size:13px">Laden…</span></div>
+      </div>
+      <div class="card">
         <div class="lbl">Poetsen</div>
         <div class="olbl">Waar</div><div class="opts" id="oRooms"></div>
         <div class="olbl">Modus</div><div class="opts" id="oMode"></div>
@@ -357,6 +388,24 @@
   <div class="bar2"><div id="doorTitle">🔔 Er staat iemand voor de deur</div><div class="x">Sluiten</div></div><div class="live" id="liveTag">● LIVE</div>
 </div>
 
+<!-- weersverwachting -->
+<div class="ov" id="wxOv"><div class="panel wpanel">
+  <div class="hd"><h2>Weer · Koudekerke</h2><div class="x" id="wxClose">Sluiten</div></div>
+  <div class="wbody">
+    <div class="wleft">
+      <div class="wsec">Komende 12 uur</div>
+      <div class="hrs" id="wHrs"><div>Laden…</div></div>
+      <div class="wsec">Komende 14 dagen <span style="float:right;text-transform:none;letter-spacing:0">max/min · neerslag · wind km/u</span></div>
+      <div class="days" id="wDays"></div>
+    </div>
+    <div class="wright">
+      <div class="wsec">Buienradar</div>
+      <div class="radar"><img id="wRadar" alt=""></div>
+      <div class="wnote">Neerslag afgelopen uur + verwachting · bron Buienradar</div>
+    </div>
+  </div>
+</div></div>
+
 <!-- temperatuur 24 uur -->
 <div class="ov" id="tempOv"><div class="panel tpanel">
   <div class="hd"><h2>Temperatuur · afgelopen 24 uur</h2><div class="x" id="tClose">Sluiten</div></div>
@@ -388,7 +437,8 @@
 /* ---------- configuratie ---------- */
 var CFG = {
   host: 'https://192-168-1-66.homey.homeylocal.com',
-  lat: 51.55, lon: 3.67,
+  lat: 51.55, wxLat: 51.484, wxLon: 3.554,
+  radarUrl: 'https://image.buienradar.nl/2.0/image/animation/RadarMapRainNL?height=340&width=340&renderBackground=True&renderBranding=False&renderText=True', lon: 3.67,
   cookFlow: 'Keuken - Kookmodus',
   cookZone: 'Keuken',
   nightFlow: 'Huis - Nachtstand',
@@ -403,7 +453,7 @@ var CFG = {
           ['Temp Wasruimte','Wasruimte'],['Temp Garage','Garage'],['Temp Domein Jes','Domein Jes']],
   mainTemp: 'Temp Woonkamer',
   p1: 'P1 Meter', prices: 'Energieprijzen', ev: 'Laadpaal',
-  robot: 'Jacqueline', robotKitchenRooms: 'keuken',
+  robot: 'Jacqueline', robotKitchenRooms: 'keuken,washok', robotRoutine: 'Stofzuigen, dan dweilen', robotKitchenRoutine: 'Keuken dweil',
   musicZone: 'Keuken',
   motion: 'Beweging keuken',
   lightZones: [['Woonkamer','Woonkamer'],['Keuken','Keuken'],['Garage','Garage'],['Terras','Veranda'],['Tuin','Tuin'],['Voortuin','Voortuin']],
@@ -753,6 +803,32 @@ function refreshMap(){
   if(DEMO) u='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="460"><rect x="20" y="20" width="360" height="420" fill="#f47a55"/><text x="200" y="240" font-size="22" text-anchor="middle" fill="#fff">kaart</text></svg>');
   if(u) $('rMap').src= DEMO ? u : u+'&t='+Date.now();
 }
+/* ---------- Roborock-routines ---------- */
+var routineList=null;
+function loadRoutines(){
+  var r=byName(CFG.robot); if(!r) return Promise.resolve([]);
+  if(DEMO) return Promise.resolve([{name:'Stofzuigen, dan dweilen'},{name:'Keuken dweil'},{name:'Woonkamer'},{name:'Begaande grond'}]);
+  var uri='homey:device:'+r.id;
+  return api('GET','manager/flow/flowcardaction/'+uri+'/'+uri+':start_scene/autocomplete?name=scene&query=').then(function(l){ routineList=l||[]; return routineList; });
+}
+function runRoutine(name){
+  return loadRoutines().then(function(list){
+    var want=String(name).toLowerCase(), pick=null;
+    list.forEach(function(s){ if(!pick && String(s.name).toLowerCase()===want) pick=s; });
+    if(!pick) list.forEach(function(s){ if(!pick && String(s.name).toLowerCase().indexOf(want)>=0) pick=s; });
+    if(!pick) throw new Error('Routine "'+name+'" niet gevonden'+(list.length?' (wel: '+list.map(function(s){return s.name;}).join(', ')+')':''));
+    return robo('start_scene',{scene:pick},'Roborock: '+pick.name);
+  }).catch(function(e){ showErr(e.message); });
+}
+function renderRoutines(){
+  loadRoutines().then(function(list){
+    var h=''; list.forEach(function(s,i){ h+='<div class="chip" data-r="'+i+'">▶ '+esc(s.name)+'</div>'; });
+    $('oRout').innerHTML=h||'<span style="color:var(--mut);font-size:13px">Geen routines gevonden</span>';
+    Array.prototype.forEach.call($('oRout').querySelectorAll('[data-r]'),function(el){ tap(el,function(){ var s=list[+el.getAttribute('data-r')]; runRoutine(s.name); }); });
+  }).catch(function(e){ $('oRout').textContent='Fout: '+e.message; });
+}
+/* Hele woning = Roborock-routine (eerst zuigen, dan dweilen, per ruimte eigen instellingen) */
+function startRoutine(){ return runRoutine(CFG.robotRoutine); }
 function startClean(){
   if(RO.rooms==='all'){
     robo('set_clean_mode',{value:RO.mode}).then(function(){ return robo('set_suction_power',{value:RO.suck}); })
@@ -828,13 +904,13 @@ function plCard(d,big){
 }
 function bindCards(root){
   Array.prototype.forEach.call(root.querySelectorAll('.pl'),function(el){
-    var d=S.devices[el.getAttribute('data-id')];
-    Array.prototype.forEach.call(el.querySelectorAll('.ctl'),function(b){ tap(b,function(){ spk(d,b.getAttribute('data-a')); }); });
-    Array.prototype.forEach.call(el.querySelectorAll('[data-j]'),function(c){ tap(c,function(){ toggleGroup(d, S.devices[c.getAttribute('data-j')]); }); });
+    var did=el.getAttribute('data-id'), d=S.devices[did];
+    Array.prototype.forEach.call(el.querySelectorAll('.ctl'),function(b){ tap(b,function(){ spk(S.devices[did]||d,b.getAttribute('data-a')); }); });
+    Array.prototype.forEach.call(el.querySelectorAll('[data-j]'),function(c){ tap(c,function(){ toggleGroup(S.devices[did]||d, S.devices[c.getAttribute('data-j')]); }); });
     var rg=el.querySelector('input');
     if(rg){
       rg.addEventListener('touchstart',function(){sliding=true;},{passive:true}); rg.addEventListener('mousedown',function(){sliding=true;});
-      rg.addEventListener('change',function(){ sliding=false; var v=rg.value/100; d.capabilitiesObj.volume_set.value=v;
+      rg.addEventListener('change',function(){ sliding=false; var v=rg.value/100; d=S.devices[did]||d; d.capabilitiesObj.volume_set.value=v;
         setCap(d.id,'volume_set',v).catch(function(e){ showErr(d.name+': '+e.message); }); });
     }
   });
@@ -844,16 +920,17 @@ function toggleGroup(host, other){
   var g=cap(host,'sonos_group')||'', inG = g && (cap(other,'sonos_group')||'')===g, p;
   if(inG){ toast(other.name+' uit de groep'); p=runCard(other.id,'cloud_leave_current_group',{}); }
   else { toast(other.name+' toegevoegd aan '+host.name); p=runCard(other.id,'cloud_join_player',{player:{id:host.id,name:host.name}}); }
-  p.then(function(){ setTimeout(loadLive,2500); setTimeout(loadLive,6000); }).catch(function(e){ showErr(e.message); });
+  p.then(function(){ setTimeout(loadLive,2500); setTimeout(loadLive,6000); setTimeout(loadLive,10000); }).catch(function(e){ showErr('Sonos: '+e.message); });
 }
+var lastBig='', lastSmall='';
 function renderPlayers(){
   if(sliding) return;
   var big='', small='', m=musicDev();
   var son=sonosList(); son.sort(function(a,b){ return a===m?-1:(b===m?1:(a.name<b.name?-1:1)); });
   son.forEach(function(d){ big+=plCard(d,true); });
   speakers().forEach(function(d){ if(!isSonos(d)) small+=plCard(d,false); });
-  $('players').innerHTML=big; $('players2').innerHTML=small;
-  bindCards($('players')); bindCards($('players2'));
+  if(big!==lastBig){ $('players').innerHTML=big; bindCards($('players')); lastBig=big; }
+  if(small!==lastSmall){ $('players2').innerHTML=small; bindCards($('players2')); lastSmall=small; }
   renderTargets();
 }
 function sonosList(){ return speakers().filter(function(d){ return (d.driverId||'').indexOf('com.sonos')>=0; }); }
@@ -893,7 +970,7 @@ function go(n){
   [1,2,3,4].forEach(function(i){ $('scr'+i).className='screen'+(n===i?' show':''); $('d'+i).className=(n===i?'on':''); });
   if(n===2){ renderPlayers(); if(!S.favs.length) loadFavs(); }
   clearInterval(mapTimer);
-  if(n===3){ renderRoboOpts(); renderRobot(); refreshMap(); mapTimer=setInterval(refreshMap,8000); }
+  if(n===3){ renderRoutines(); renderRoboOpts(); renderRobot(); refreshMap(); mapTimer=setInterval(refreshMap,8000); }
   if(n===4){ renderLightTop(); renderLights(); $('lList').scrollTop=0; }
 }
 (function(){
@@ -1008,8 +1085,8 @@ tap($('night'),function(){ store.set('kookPrev',''); renderActs(); triggerFlow(C
 tap($('alloff'),function(){ store.set('kookPrev',''); renderActs(); triggerFlow(CFG.allOffFlow,'Alle lampen uit'); });
 tap($('garland'),toggleGarland);
 Array.prototype.forEach.call(document.querySelectorAll('[data-mood]'),function(el){ tap(el,function(){ setMood(el.getAttribute('data-mood')); }); });
-tap($('roboAll'),function(){ robo('clean_all',{},'Roborock: hele woning'); });
-tap($('roboKitchen'),function(){ robo('clean_rooms_with_config',{rooms:CFG.robotKitchenRooms,repeat:1,clean_mode:'1',suction_power:'102',scrub_intensity:'201',mop_route:'300'},'Roborock: keuken stofzuigen + dweilen'); });
+tap($('roboAll'),startRoutine);
+tap($('roboKitchen'),function(){ runRoutine(CFG.robotKitchenRoutine); });
 tap($('roboStop'),function(){ robo('stop_clean',{},'Roborock stopt').then(function(){ return robo('dock',{}); }); });
 tap($('mPrev'),function(){ spk(musicDev(),'prev'); });
 tap($('mNext'),function(){ spk(musicDev(),'next'); });
@@ -1032,9 +1109,59 @@ tap($('rEmpty'),function(){ robo('empty_dustbin',{},'Stofzak legen'); });
 tap($('rWash'),function(){ robo('wash_mop',{},'Dweil wassen'); });
 tap($('door'),hideDoor);
 tap($('tempCard'),openTemps);
+tap($('clockCard'),openWx);
+tap($('wxClose'),closeWx);
+tap($('wxOv'),closeWx);
+tap(document.querySelector('.wpanel'),function(){});
 tap($('tClose'),closeTemps);
 tap($('tempOv'),closeTemps);
 tap(document.querySelector('.tpanel'),function(){});
+
+/* ---------- weersverwachting (Koudekerke) ---------- */
+var wxTimer=null;
+function compass(d){ return ['N','NO','O','ZO','Z','ZW','W','NW'][Math.round(((d||0)%360)/45)%8]; }
+function openWx(){
+  if($('setupOv').className.indexOf('show')>=0) return;
+  $('wxOv').className='ov show'; $('wHrs').innerHTML='<div>Laden…</div>'; $('wDays').innerHTML='';
+  $('wRadar').src= DEMO ? '' : CFG.radarUrl+'&t='+Math.floor(Date.now()/300000);
+  clearTimeout(wxTimer); wxTimer=setTimeout(closeWx,180000);
+  if(DEMO){ renderWx(demoWx()); return; }
+  var u='https://api.open-meteo.com/v1/forecast?latitude='+CFG.wxLat+'&longitude='+CFG.wxLon+
+    '&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,is_day&forecast_hours=13'+
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant'+
+    '&forecast_days=14&timezone=Europe%2FAmsterdam';
+  fetch(u).then(function(r){ return r.json(); }).then(renderWx).catch(function(e){ $('wHrs').innerHTML='<div>Weer ophalen mislukt</div>'; });
+}
+function closeWx(){ $('wxOv').className='ov'; $('wRadar').src=''; clearTimeout(wxTimer); }
+function renderWx(w){
+  var H=w.hourly, h='', now=Date.now();
+  for(var i=0;i<H.time.length && h.split('<div>').length<=12;i++){
+    var tm=new Date(H.time[i]); if(tm.getTime()+3600000<now) continue;
+    var ic=wxInfo(H.weather_code[i])[0]; if(!H.is_day[i] && H.weather_code[i]<=2) ic='🌙';
+    var mm=H.precipitation[i], pp=H.precipitation_probability[i];
+    h+='<div>'+pad(tm.getHours())+':00<i>'+ic+'</i><b>'+Math.round(H.temperature_2m[i])+'°</b><small>'+
+      (mm>=0.1? nf(mm,1)+' mm' : (pp>=30? pp+'%':''))+'</small></div>';
+  }
+  $('wHrs').innerHTML=h;
+  var D=w.daily, d='', order=[];
+  for(var k=0;k<D.time.length;k++) order.push(k);
+  // kolom 1: dag 1-7, kolom 2: dag 8-14 (grid vult per rij, dus afwisselen)
+  var half=Math.ceil(D.time.length/2), seq=[]; for(var r=0;r<half;r++){ seq.push(r); if(r+half<D.time.length) seq.push(r+half); }
+  seq.forEach(function(k){
+    var dt=new Date(D.time[k]+'T12:00:00'), nm= k===0?'<b>Vandaag</b>':(k===1?'<b>Morgen</b>':'<b>'+DAYS[dt.getDay()].substr(0,2)+'</b> '+dt.getDate());
+    var mm=D.precipitation_sum[k];
+    d+='<div class="dy"><span class="n">'+nm+'</span><i>'+wxInfo(D.weather_code[k])[0]+'</i>'+
+      '<span class="tt"><b>'+Math.round(D.temperature_2m_max[k])+'°</b> <span>'+Math.round(D.temperature_2m_min[k])+'°</span></span>'+
+      '<span class="rn">'+(mm>=0.1? nf(mm,1)+' mm':'')+'</span>'+
+      '<span class="wd">'+compass(D.wind_direction_10m_dominant[k])+' '+Math.round(D.wind_speed_10m_max[k])+'</span></div>';
+  });
+  $('wDays').innerHTML=d;
+}
+function demoWx(){ var t0=new Date(); t0.setMinutes(0,0,0); var H={time:[],temperature_2m:[],precipitation_probability:[],precipitation:[],weather_code:[],wind_speed_10m:[],is_day:[]};
+  for(var i=0;i<13;i++){ var tt=new Date(t0.getTime()+i*3600000); H.time.push(tt.toISOString()); H.temperature_2m.push(3+Math.sin(i/3)*2); H.precipitation_probability.push([10,20,60,80,40,10,0,0,30,50,20,0,0][i]); H.precipitation.push([0,0,0.4,1.2,0.2,0,0,0,0,0.3,0,0,0][i]); H.weather_code.push([3,3,61,63,80,2,1,0,2,61,3,2,1][i]); H.wind_speed_10m.push(20); H.is_day.push(tt.getHours()>7&&tt.getHours()<17?1:0); }
+  var D={time:[],weather_code:[],temperature_2m_max:[],temperature_2m_min:[],precipitation_sum:[],precipitation_probability_max:[],wind_speed_10m_max:[],wind_direction_10m_dominant:[]};
+  for(var k=0;k<14;k++){ var dd=new Date(Date.now()+k*86400000); D.time.push(dd.getFullYear()+'-'+pad(dd.getMonth()+1)+'-'+pad(dd.getDate())); D.weather_code.push([3,61,2,80,0,1,63,3,2,61,0,1,3,80][k]); D.temperature_2m_max.push(5+k%4); D.temperature_2m_min.push(1+k%3); D.precipitation_sum.push([0,4.2,0,2.1,0,0,6,0.2,0,3,0,0,0,1.5][k]); D.precipitation_probability_max.push(50); D.wind_speed_10m_max.push(20+k*2); D.wind_direction_10m_dominant.push(k*40); }
+  return {hourly:H,daily:D}; }
 
 /* ---------- temperatuurgrafiek ---------- */
 var TCOL=['#ffb547','#5ac8fa','#ff6b6b','#7ed957','#c792ea','#f78fb3','#4dd0b5','#e8e8e8','#ffd166'];
@@ -1104,7 +1231,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-25-v16';
+var VERSION='2026-11-26-v19';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
