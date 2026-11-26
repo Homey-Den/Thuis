@@ -91,6 +91,7 @@
   .mt span{display:block;font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
   .ctl{width:44px;height:44px;border-radius:22px;background:var(--card2);display:flex;align-items:center;justify-content:center;margin-left:6px;flex:none;}
   .ctl svg{fill:#eef0f4;}
+  .ctl.shuf.on{background:#2f6d4a;} .ctl.shuf.on svg{fill:#d8ffe6;}
   .ctl.big{width:50px;height:50px;border-radius:25px;background:#eef0f4;}
   .ctl.big svg{fill:#0f1115;}
 
@@ -316,6 +317,7 @@
       <div class="music" id="musicTile">
         <div class="art" id="mArt">♪</div>
         <div class="mt" id="mText"><b>--</b><span></span></div>
+        <div class="ctl shuf" id="mShuf" style="display:none"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M16 3h5v5h-2V6.4l-4.3 4.3-1.4-1.4L17.6 5H16zM3 5.4 4.4 4l15.6 15.6V18h2v5h-5v-2h1.6zM9.3 13.3l1.4 1.4L6.4 19H5v-2h.6z"/></svg></div>
         <div class="ctl" id="mPrev"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M6 5h2v14H6zM9.5 12 19 5v14z"/></svg></div>
         <div class="ctl big" id="mPlay"></div>
         <div class="ctl" id="mNext"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM5 5l9.5 7L5 19z"/></svg></div>
@@ -901,6 +903,9 @@ function renderMusic(){
   $('mArt').style.backgroundImage= (u && pl!==false && tr.a) ? 'url("'+u+'")' : '';
   $('mArt').textContent= (u && tr.a) ? '' : '♪';
   $('mPlay').innerHTML= pl? PAUSE : PLAY;
+  var sh=cap(d,'speaker_shuffle'), radio=!cap(d,'speaker_album');
+  $('mShuf').style.display= (has(d,'speaker_shuffle') && !radio) ? '' : 'none';
+  $('mShuf').className='ctl shuf'+(sh?' on':'');
   var grp=groupOf(d), gv=groupVol(grp);
   $('mZone').textContent= grp.length>1 ? 'Muziek · '+grp.map(sName).join(' + ') : 'Muziek · '+sName(d).toLowerCase();
   if(!mSliding && gv!==null) $('mVol').value=Math.round(gv*100);
@@ -1152,6 +1157,8 @@ tap($('roboStop'),function(){ robo('stop_clean',{},'Roborock stopt').then(functi
 tap($('mPrev'),function(){ spk(musicDev(),'prev'); });
 tap($('mNext'),function(){ spk(musicDev(),'next'); });
 tap($('mPlay'),function(){ spk(musicDev(),'play'); });
+tap($('mShuf'),function(){ var d=musicDev(); if(!d) return; var v=!cap(d,'speaker_shuffle'); ovr(d,'speaker_shuffle',v,6000); renderMusic(); toast(v?'Willekeurig aan':'Willekeurig uit');
+  setCap(d.id,'speaker_shuffle',v).then(function(){ setTimeout(loadLive,2000); }).catch(function(e){ showErr('Sonos: '+e.message); }); });
 tap($('mArt'),function(){ go(2); });
 tap($('mText'),function(){ go(2); });
 tap($('mHead'),function(){ go(2); });
@@ -1355,7 +1362,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-26-v24';
+var VERSION='2026-11-26-v25';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
@@ -1390,7 +1397,7 @@ function demoApi(method,path){
     var jr=C('Jacqueline',{is_cleaning:false,dock:true,measure_battery:100,battery_charging_state:'charging',clean_area:51.9,clean_time:0.97,mop_attached:true,clean_room_pick:null}); jr.capabilitiesObj.clean_room_pick.values=[{id:'1',title:'woonkamer'},{id:'2',title:'keuken'}];
     var sp=[['Keuken','com.sonos',true,'Mr. Brightside','The Killers','z2'],['Sonos Woonkamer','com.sonos',false,'Homey',null,'z1'],['Sonos Badkamer','com.sonos',false,null,null,'x'],
             ['Chromecast woonkamer','chromecast',false,'Idle','','x'],['Chromecast veranda','chromecast',false,'YouTube','YouTube','x'],['Speaker garage','chromecast',true,'Er is maar één NPO Radio 2','NPO Radio 2','x'],['Home pod','homepod',false,'NPO Radio 2','AirMusic','x']];
-    sp.forEach(function(s){ C(s[0],{speaker_playing:s[2],speaker_track:s[3],speaker_artist:s[4],speaker_next:null,speaker_prev:null,volume_set:0.3,sonos_group:(s[0]==='Keuken'||s[0]==='Sonos Woonkamer')?'Keuken + 1':(s[1]==='com.sonos'?s[0]:null)},{'class':'speaker',driverId:'homey:app:'+s[1]+':x',zone:s[5]}); });
+    sp.forEach(function(s){ C(s[0],{speaker_shuffle:true,speaker_album:s[0]==='Keuken'?'Hot Fuss':null,speaker_playing:s[2],speaker_track:s[3],speaker_artist:s[4],speaker_next:null,speaker_prev:null,volume_set:0.3,sonos_group:(s[0]==='Keuken'||s[0]==='Sonos Woonkamer')?'Keuken + 1':(s[1]==='com.sonos'?s[0]:null)},{'class':'speaker',driverId:'homey:app:'+s[1]+':x',zone:s[5]}); });
     return D;
   }
   return {};
