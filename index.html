@@ -879,7 +879,9 @@ var PLAY='<svg width="22" height="22" viewBox="0 0 24 24"><path d="M7 4l13 8-13 
 var PAUSE='<svg width="22" height="22" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
 var PREV='<svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 5h2v14H6zM9.5 12 19 5v14z"/></svg>';
 var NEXT='<svg width="16" height="16" viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM5 5l9.5 7L5 19z"/></svg>';
-function artUrl(d){ var a=cap(d,'artwork_url_local'); if(a) return a; return img(d,'albumart'); }
+function artUrl(d){ var a=cap(d,'artwork_url_local')||img(d,'albumart'); if(!a) return a;
+  var k=(cap(d,'speaker_track')||'')+'|'+(cap(d,'speaker_artist')||''), h=0; for(var i=0;i<k.length;i++) h=(h*31+k.charCodeAt(i))|0; // per nummer een andere url, anders toont Safari de oude hoes
+  return a+(a.indexOf('?')>=0?'&':'?')+'n='+(h>>>0).toString(36); }
 function trackOf(d){
   var t=cap(d,'speaker_track'), a=cap(d,'speaker_artist');
   if(!t || t==='Homey' || t==='Idle') return {t: cap(d,'speaker_playing')? 'Speelt' : 'Niets aan het spelen', a:''};
@@ -936,7 +938,7 @@ function spk(d,act){
   var p;
   if(act==='play'){ var v=!cap(d,'speaker_playing'); d.capabilitiesObj.speaker_playing.value=v; renderMusic(); if(cur===2) renderPlayers(); p=setCap(d.id,'speaker_playing',v); }
   else p=setCap(d.id, act==='next'?'speaker_next':'speaker_prev', true);
-  p.then(function(){ setTimeout(loadLive,1500); }).catch(function(e){ showErr(d.name+': '+e.message); });
+  p.then(function(){ setTimeout(loadLive,1500); setTimeout(loadLive,4000); setTimeout(loadLive,8000); }).catch(function(e){ showErr(d.name+': '+e.message); });
 }
 
 /* scherm 2 */
@@ -1362,7 +1364,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-26-v25';
+var VERSION='2026-11-26-v26';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
