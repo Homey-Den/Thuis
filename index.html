@@ -246,6 +246,16 @@
   .ef:last-child{margin-right:0;} .ef span{display:block;font-size:14px;color:var(--mut);} .ef b{display:block;font-size:34px;font-weight:400;margin:2px 0;} .ef small{font-size:13px;color:var(--mut);}
   .ehd{display:flex;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;padding:0 6px 4px;}
 
+  /* alarm */
+  @-webkit-keyframes alflash{0%,100%{background:#b00010;}50%{background:#2a0004;}}
+  @keyframes alflash{0%,100%{background:#b00010;}50%{background:#2a0004;}}
+  .ov.alarm{z-index:30;-webkit-animation:alflash 1s infinite;animation:alflash 1s infinite;text-align:center;}
+  .alarm .ai{font-size:110px;margin-top:110px;}
+  .alarm h1{font-size:64px;margin:10px 0 6px;font-weight:700;letter-spacing:.02em;}
+  .alarm p{font-size:22px;opacity:.85;margin:0;}
+  .alarm .stop{display:inline-block;margin-top:60px;background:#fff;color:#b00010;font-weight:700;font-size:26px;padding:20px 46px;border-radius:18px;}
+  .alarm .mute{display:block;margin-top:18px;font-size:17px;opacity:.8;}
+
   /* overlays */
   .ov{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.92);display:none;z-index:10;}
   .ov.show{display:block;}
@@ -415,6 +425,13 @@
   <div class="wnote">≈ = geschat door Homey · W = nu · kWh = vandaag</div>
 </div></div>
 
+<!-- alarm -->
+<div class="ov alarm" id="alarmOv">
+  <div class="ai">🚨</div><h1 id="alTitle">ALARM</h1><p id="alSub"></p>
+  <div class="stop" id="alStop">Alarm stoppen</div>
+  <div class="mute" id="alMute">Alleen sirene uit</div>
+</div>
+
 <!-- weersverwachting -->
 <div class="ov" id="wxOv"><div class="panel wpanel">
   <div class="hd"><h2>Weer · Koudekerke</h2><div class="x" id="wxClose">Sluiten</div></div>
@@ -473,7 +490,7 @@ var CFG = {
   garland: 'Lampjes voortuin',
   garlandOnFlow: 'Voortuin - Lampjes aan (dashboard)',
   garlandOffFlow: 'Voortuin - Lampjes uit (dashboard + 23:00)',
-  doorbellVar: 'Deurbel',
+  doorbellVar: 'Deurbel', alarmVar: 'Alarm', sirenVol: 70, sirenMin: 5,
   doorbellDevice: 'voordeur',
   doorShowSec: 60,
   temps: [['Temp Keuken','Keuken'],['Temp Entree','Entree'],['Temp Slaapkamer','Slaapkamer'],['Temp Kantoor','Kantoor'],
@@ -1134,6 +1151,34 @@ function pollDoorbell(){
   }).catch(function(){}).then(function(){ doorBusy=false; });
 }
 
+/* ---------- alarm ---------- */
+var alarmOn='', alBusy=false, sirenT=null, sirenUntil=0, alMuted=false;
+function pollAlarm(){
+  var id=varId(CFG.alarmVar); if(!id||alBusy) return;
+  alBusy=true;
+  api('GET','manager/logic/variable/'+id).then(function(v){ var s=(v&&v.value)||'';
+    if(s && s!==alarmOn) showAlarm(s); else if(!s && alarmOn) hideAlarm();
+  }).catch(function(){}).then(function(){ alBusy=false; });
+}
+function showAlarm(s){
+  alarmOn=s; alMuted=false; wake();
+  var smoke=/rook/i.test(s);
+  $('alTitle').textContent= smoke ? 'ROOKALARM' : 'ALARM';
+  $('alSub').textContent= s.replace(/^(ALARM|ROOKALARM)\s*/i,'') + ' · ' + pad(new Date().getHours())+':'+pad(new Date().getMinutes());
+  $('alarmOv').className='ov alarm show';
+  sirenUntil=Date.now()+CFG.sirenMin*60000; clearInterval(sirenT);
+  sirenT=setInterval(siren, 9000); // de flow speelt de eerste keer, daarna herhaalt het dashboard
+}
+function siren(){
+  if(!alarmOn || alMuted || Date.now()>sirenUntil){ clearInterval(sirenT); return; }
+  sonosList().forEach(function(d){ runCard(d.id,'cloud_play_sound',{sound:{id:'alarm2',name:'Alarm 2'},volume:CFG.sirenVol}).catch(function(){}); });
+}
+function hideAlarm(){ alarmOn=''; clearInterval(sirenT); $('alarmOv').className='ov alarm'; }
+tap($('alStop'),function(){ var id=varId(CFG.alarmVar); hideAlarm(); toast('Alarm gestopt');
+  if(id) api('PUT','manager/logic/variable/'+id,{value:''}).catch(function(e){ showErr(e.message); }); });
+tap($('alMute'),function(){ alMuted=true; clearInterval(sirenT); toast('Sirene uit'); });
+tap($('alarmOv'),function(){});
+
 /* ---------- instellingen ---------- */
 function openSetup(){ $('sHost').value=HOST; $('sKey').value=''; $('sRl').value=''; $('setupOv').className='ov show'; }
 tap($('sSave'),function(){
@@ -1354,6 +1399,7 @@ function start(){
   setInterval(function(){ if(!asleep) loadLive(); }, CFG.pollMs);
   setInterval(function(){ loadStatic().catch(function(){}); }, 10*60*1000);
   setInterval(pollDoorbell, 1500);
+  setInterval(pollAlarm, 2000);
   setInterval(pollMotion, 3000);
   camLoop(function(){ return doorOpen ? $('doorImg') : $('camImg'); }, function(){ return doorOpen ? 700 : 2000; });
   loadEZ(); setInterval(loadEZ, 30*60*1000);
@@ -1364,7 +1410,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-26-v26';
+var VERSION='2026-11-26-v27';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
