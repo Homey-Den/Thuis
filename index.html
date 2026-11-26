@@ -409,6 +409,7 @@
   <div class="lscroll" id="lList"></div>
 </div></div>
 
+<div id="ver" style="position:fixed;left:14px;bottom:3px;font-size:10px;color:#4a505c;z-index:5;pointer-events:none"></div>
 <div class="dots"><i id="d1" class="on"></i><i id="d2"></i><i id="d3"></i><i id="d4"></i></div>
 
 <!-- deurbel groot -->
@@ -1410,7 +1411,8 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-26-v27';
+var VERSION='2026-11-26-v28';
+try{ document.getElementById('ver').textContent=VERSION.replace(/^\d{4}-/,''); }catch(e){}
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
