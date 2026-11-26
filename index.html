@@ -241,6 +241,8 @@
   .er .w{width:78px;text-align:right;font-weight:600;white-space:nowrap;} .er .w.z{color:#5c6270;font-weight:400;}
   .er .k{width:84px;text-align:right;color:var(--mut);font-size:13px;white-space:nowrap;}
   .er.bad .w{color:#ff6b6b;}
+  .efeat{display:flex;margin-bottom:10px;} .ef{flex:1;background:#232a36;border:1px solid #2f3a4a;border-radius:14px;padding:12px 16px;margin-right:10px;}
+  .ef:last-child{margin-right:0;} .ef span{display:block;font-size:14px;color:var(--mut);} .ef b{display:block;font-size:34px;font-weight:400;margin:2px 0;} .ef small{font-size:13px;color:var(--mut);}
   .ehd{display:flex;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;padding:0 6px 4px;}
 
   /* overlays */
@@ -406,6 +408,7 @@
 <div class="ov" id="enOv"><div class="panel epanel">
   <div class="hd"><h2>Energie per apparaat</h2><div class="x" id="enClose">Sluiten</div></div>
   <div class="etop" id="enTop"></div>
+  <div class="efeat" id="enFeat"></div>
   <div class="elist" id="enList"><div class="tmsg">Laden…</div></div>
   <div class="wnote">≈ = geschat door Homey · W = nu · kWh = vandaag</div>
 </div></div>
@@ -474,7 +477,7 @@ var CFG = {
   temps: [['Temp Keuken','Keuken'],['Temp Entree','Entree'],['Temp Slaapkamer','Slaapkamer'],['Temp Kantoor','Kantoor'],
           ['Temp Wasruimte','Wasruimte'],['Temp Garage','Garage'],['Temp Domein Jes','Domein Jes']],
   mainTemp: 'Temp Woonkamer',
-  p1: 'P1 Meter', prices: 'Energieprijzen', ev: 'Laadpaal',
+  p1: 'P1 Meter', enFeatured: ['Airco woonkamer','Airco slaapkamer','Laadpaal'], prices: 'Energieprijzen', ev: 'Laadpaal',
   robot: 'Jacqueline', robotKitchenRooms: 'keuken,washok', routines: [['Stofzuigen, dan dweilen','Alles'],['Keuken dweil','Keuken'],['Woonkamer','Woonkamer'],['Begaande grond','Begane grond']],
   musicZone: 'Keuken',
   motion: 'Beweging keuken',
@@ -1203,14 +1206,27 @@ function loadEn(){
 function renderEn(x){
   var el=(x.rep&&x.rep.electricity)||{}, cons=(el.devices&&el.devices.consumed)||{}, rows={}, skip=/P1 Meter|Σ/;
   each(x.live,function(v,id){ if(v.type!=='device' || skip.test(v.name)) return; rows[id]={name:v.name, zone:v.zone, W:v.W, kwh:null, approx:false}; });
-  each(cons,function(v,id){ if(skip.test(v.name)) return; var r=rows[id]||(rows[id]={name:v.name, zone:'', W:null}); r.kwh=v.period; r.approx=!!v.approximatedEnergy; });
-  var list=[]; each(rows,function(r){ list.push(r); });
+  each(cons,function(v,id){ if(skip.test(v.name)) return; var r=rows[id]||(rows[id]={name:v.name, zone:'', W:null}); r.kwh=v.period; r.total=v.total; r.approx=!!v.approximatedEnergy; });
+  var evs=(el.devices&&el.devices.evChargerCharged)||{};
+  each(evs,function(v,id){ var r=rows[id]||(rows[id]={name:v.name, zone:'', W:null}); r.kwh=v.period; r.total=v.total; });
+  // alleen apparaten die echt verbruik kunnen opgeven (meten zelf, of Homey heeft een schatting met verbruik)
+  var list=[], feat=[];
+  each(rows,function(r,id){ var d=S.devices[id];
+    var can = (d && has(d,'measure_power')) || (r.W||0)>0 || (r.total||0)>0 || (r.kwh||0)>0;
+    if(!can) return;
+    if((d && (d['class']==='light' || d.virtualClass==='light')) || /lamp|licht|ledstrip/i.test(r.name)) return; // lampen niet tonen
+    var fi=(CFG.enFeatured||[]).indexOf(r.name); if(fi>=0){ r.fi=fi; feat.push(r); } else list.push(r); });
+  feat.sort(function(a,b){ return a.fi-b.fi; });
   list.sort(function(a,b){ return (b.W||0)-(a.W||0) || (b.kwh||0)-(a.kwh||0); });
   var p1=byName(CFG.p1), net=cap(p1,'measure_power');
   $('enTop').innerHTML='<div>Nu van/naar net<b>'+(net===null?'--':Math.round(net)+' W')+'</b></div>'+
     '<div>Afgenomen vandaag<b>'+nf(el.importedPeriod,1)+' kWh</b></div>'+
     '<div>Teruggeleverd vandaag<b>'+nf(el.exportedPeriod,1)+' kWh</b></div>'+
-    '<div>Apparaten actief<b>'+list.filter(function(r){ return (r.W||0)>0; }).length+'</b></div>';
+    '<div>Apparaten actief<b>'+list.concat(feat).filter(function(r){ return (r.W||0)>0; }).length+'</b></div>';
+  var fh=''; feat.forEach(function(r){ var w=r.W;
+    fh+='<div class="ef"><span>'+esc(r.name)+'</span><b>'+(w===null||w===undefined?'–':(w>=1000?nf(w/1000,1)+' kW':Math.round(w)+' W'))+'</b>'+
+      '<small>Vandaag '+(r.kwh===null||r.kwh===undefined?'–':nf(r.kwh,2)+' kWh')+'</small></div>'; });
+  $('enFeat').innerHTML=fh; $('enFeat').style.display=fh?'':'none';
   var half=Math.ceil(list.length/2), seq=[]; for(var i=0;i<half;i++){ seq.push(list[i]); if(i+half<list.length) seq.push(list[i+half]); }
   var h='<div class="ehd"><span style="flex:1">Apparaat</span><span style="width:78px;text-align:right">Nu</span><span style="width:84px;text-align:right">Vandaag</span></div>';
   h+=h.replace('class="ehd"','class="ehd" style="visibility:visible"');
@@ -1221,7 +1237,7 @@ function renderEn(x){
   $('enList').innerHTML= list.length? h : '<div class="tmsg">Geen verbruik gevonden</div>';
 }
 function demoEn(){ var live={}, n=0; function L(nm,z,w){ live['x'+(++n)]={name:nm,zone:z,W:w,type:'device'}; }
-  L('Airco woonkamer','Woonkamer',661); L('Lamp garage','Garage',61); L('Koelkast','Keuken',85); L('Lamp keuken 1','Keuken',7); L('Airco slaapkamer','Slaapkamer',1.3); L('Fietsenlader','Garage',0); L('Lamp hoek kantoor','Kantoor',28000);
+  L('Airco woonkamer','Woonkamer',661); L('Lamp garage','Garage',61); L('Koelkast','Keuken',85); L('Lamp keuken 1','Keuken',7); L('Airco slaapkamer','Slaapkamer',1.3); L('Fietsenlader','Garage',0); L('Lamp hoek kantoor','Kantoor',28000); L('Laadpaal','Garage',7400); L('WhatsApp Dennis','',0);
   var cons={x1:{name:'Airco woonkamer',period:3.2},x2:{name:'Lamp garage',period:0.4},x3:{name:'Koelkast',period:0.9,approximatedEnergy:true},x4:{name:'Lamp keuken 1',period:0.05,approximatedEnergy:true},x5:{name:'Airco slaapkamer',period:0.73},x6:{name:'Fietsenlader',period:0.21},x7:{name:'Lamp hoek kantoor',period:377.8,approximatedEnergy:true}};
   return {live:live, rep:{electricity:{importedPeriod:6.4,exportedPeriod:1.2,devices:{consumed:cons}}}}; }
 
@@ -1339,7 +1355,7 @@ start();
 var bootT=Date.now();
 setInterval(function(){ if(!doorOpen && Date.now()-bootT > 3*3600000) location.reload(); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-26-v22';
+var VERSION='2026-11-26-v24';
 setInterval(function(){
   if(DEMO) return;
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
