@@ -196,7 +196,9 @@
   .ctile .r span{font-size:15px;color:var(--mut);} .ctile .r b{font-size:30px;font-weight:300;}
   .ctile .r b.old{color:#5c6270;}
   .ctile .a{font-size:13px;margin-top:1px;color:var(--mut);} .ctile .a.on{color:var(--txt);}
-  .ctile .a i{font-style:normal;margin-right:4px;}
+  .ctile .a{font-size:17px;display:flex;align-items:center;}
+  .ctile .a .ai{font-style:normal;margin-right:6px;font-size:18px;}
+  .ctile .a .ai.off{color:#5c6270;font-size:16px;}
   .panel.kpanel{width:1000px;height:720px;max-height:none;overflow:hidden;display:flex;flex-direction:column;padding:18px 22px;}
   .kpanel .hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
   .kpanel .hd h2{margin:0;} .kpanel .hd small{color:var(--mut);font-size:14px;}
@@ -1537,12 +1539,15 @@ function acOn(d){ return cap(d,'onoff')===true && cap(d,'thermostat_mode')!=='of
 function acTxt(d){ if(!d) return ''; if(!acOn(d)) return 'airco uit';
   var m=modeOf(cap(d,'thermostat_mode'))||['','','',cap(d,'thermostat_mode')], t=cap(d,'target_temperature');
   return '<i>'+m[1]+'</i>'+m[3]+(m[0]==='heat'||m[0]==='cool'||m[0]==='auto'? ' naar '+fmtT(pendT[d.id]!==undefined?pendT[d.id]:t):''); }
+function acIcon(d){ if(!acOn(d)) return '<i class="ai off">⏻</i>';
+  var m=cap(d,'thermostat_mode'), x=modeOf(m), t=pendT[d.id]!==undefined?pendT[d.id]:cap(d,'target_temperature');
+  return '<i class="ai '+m+'">'+(x?x[1]:'?')+'</i>'+(m==='heat'||m==='cool'||m==='auto'? fmtT(t) : ''); }
 function tempOf(sensor,ac){ var d=byName(sensor), v=cap(d,'measure_temperature'); if(v===null && ac) v=cap(ac,'measure_temperature'); return {v:v, old:d?capAge(d,'measure_temperature')>STALE_H:false, lb:lowBatt(d)}; }
 function renderClim(){
   var h='';
   CFG.aircos.forEach(function(a){ var ac=byName(a[0]), t=tempOf(a[1],ac);
     h+='<div class="ctile"><div class="r"><span>'+a[2]+(t.lb?' 🔋':'')+'</span><b class="'+(t.old?'old':'')+'">'+fmtT(t.v)+'</b></div>'+
-       (ac?'<div class="a'+(acOn(ac)?' on':'')+'">'+acTxt(ac)+'</div>':'')+'</div>'; });
+       (ac?'<div class="a'+(acOn(ac)?' on':'')+'">'+acIcon(ac)+'</div>':'')+'</div>'; });
   var oa=byName(CFG.aircos[0][0]), ot=cap(oa,'measure_temperature.outside');
   if(ot!==null) h+='<div class="ctile out"><div class="r"><span>Buiten</span><b>'+fmtT(ot)+'</b></div></div>';
   $('climTile').innerHTML=h;
@@ -1615,7 +1620,7 @@ setInterval(function(){ if(doorOpen || alarmOn || Date.now()-bootT < 3*3600000) 
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
   .then(function(t){ if(t && t.indexOf('var VERSION=')>=0) location.reload(); }).catch(function(){}); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-27-v36';
+var VERSION='2026-11-27-v37';
 try{ document.getElementById('ver').textContent=VERSION.replace(/^\d{4}-/,''); }catch(e){}
 setInterval(function(){
   if(DEMO) return;
