@@ -312,6 +312,8 @@
   .carrow span{color:var(--mut);font-size:15px;flex:1;}
   .plug{width:22px;height:30px;flex:none;}
   .plug.on{color:#2fbf68;} .plug.off{color:var(--bad);}
+  .plug .x{display:none;} .plug.off .x{display:inline;}
+  .cpanel .plug .x line:first-child{stroke:#191c23;}
   .cbar{height:8px;border-radius:4px;background:#2c313c;margin:6px 0 10px;overflow:hidden;}
   .cbar i{display:block;height:100%;border-radius:4px;background:var(--ok);width:0;}
   .cst{font-size:12px;color:var(--mut);margin:-4px 0 8px;}
@@ -420,7 +422,7 @@
     <div class="card" id="carCard">
       <div class="lbl"><span id="carName">Giorgio</span><span>meer ›</span></div>
       <div class="carimg"><img src="giorgio.png" alt=""><div class="hvb" id="hvB"></div></div>
-      <div class="carrow"><b id="carPct">--%</b><span id="carKm"></span><i class="plug" id="carPlug"><svg viewBox="0 0 22 30" fill="currentColor"><rect x="5" y="0" width="3" height="8" rx="1"/><rect x="14" y="0" width="3" height="8" rx="1"/><path d="M1 8h20v7a8 8 0 0 1-6 7.7V30h-8v-7.3A8 8 0 0 1 1 15z"/></svg></i></div>
+      <div class="carrow"><b id="carPct">--%</b><span id="carKm"></span><i class="plug" id="carPlug"><svg viewBox="-2 0 26 30" fill="currentColor" overflow="visible"><rect x="5" y="0" width="3" height="8" rx="1"/><rect x="14" y="0" width="3" height="8" rx="1"/><path d="M1 8h20v7a8 8 0 0 1-6 7.7V30h-8v-7.3A8 8 0 0 1 1 15z"/><g class="x"><line x1="-1" y1="2" x2="23" y2="28" stroke="#191c23" stroke-width="6" stroke-linecap="round"/><line x1="-1" y1="2" x2="23" y2="28" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></g></svg></i></div>
       <div class="cbar"><i id="carBar"></i></div>
       <div class="act hold" id="carHv" data-ms="1500"><span class="hf"></span><span class="ht">Voorverwarmen (vasthouden)</span></div>
       <div class="cupd" id="carUpd"></div>
@@ -495,7 +497,7 @@
 <div class="ov" id="carOv"><div class="panel cpanel">
   <div class="hd"><div><h2 id="cName">Giorgio</h2><small id="cSub"></small></div><div class="x" id="carClose">Sluiten</div></div>
   <div class="carimg"><img src="giorgio.png" alt=""><div class="hvb" id="hvB2"></div></div>
-  <div class="carrow"><b id="cPct">--%</b><span id="cKm"></span><i class="plug" id="cPlug"><svg viewBox="0 0 22 30" fill="currentColor"><rect x="5" y="0" width="3" height="8" rx="1"/><rect x="14" y="0" width="3" height="8" rx="1"/><path d="M1 8h20v7a8 8 0 0 1-6 7.7V30h-8v-7.3A8 8 0 0 1 1 15z"/></svg></i></div>
+  <div class="carrow"><b id="cPct">--%</b><span id="cKm"></span><i class="plug" id="cPlug"><svg viewBox="-2 0 26 30" fill="currentColor" overflow="visible"><rect x="5" y="0" width="3" height="8" rx="1"/><rect x="14" y="0" width="3" height="8" rx="1"/><path d="M1 8h20v7a8 8 0 0 1-6 7.7V30h-8v-7.3A8 8 0 0 1 1 15z"/><g class="x"><line x1="-1" y1="2" x2="23" y2="28" stroke="#191c23" stroke-width="6" stroke-linecap="round"/><line x1="-1" y1="2" x2="23" y2="28" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></g></svg></i></div>
   <div class="cbar"><i id="cBar"></i></div>
   <div class="clim" id="cLim"></div>
   <div class="cgrid" id="cGrid"></div>
@@ -1613,7 +1615,7 @@ setInterval(function(){ if(doorOpen || alarmOn || Date.now()-bootT < 3*3600000) 
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
   .then(function(t){ if(t && t.indexOf('var VERSION=')>=0) location.reload(); }).catch(function(){}); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-27-v35';
+var VERSION='2026-11-27-v36';
 try{ document.getElementById('ver').textContent=VERSION.replace(/^\d{4}-/,''); }catch(e){}
 setInterval(function(){
   if(DEMO) return;
