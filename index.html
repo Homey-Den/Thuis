@@ -315,8 +315,10 @@
   .cgrid div{background:var(--card2);border-radius:14px;padding:10px 14px;}
   .cgrid small{display:block;color:var(--mut);font-size:13px;} .cgrid b{display:block;font-size:20px;font-weight:600;margin-top:3px;}
   .cgrid b.bad{color:var(--bad);}
-  .cbtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:10px;margin-top:14px;}
+  .cbtns{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-gap:10px;margin-top:14px;}
   .cbtns .act{height:56px;font-size:16px;}
+  .clim{font-size:14px;color:var(--mut);margin:-6px 0 12px;} .clim b{color:var(--txt);font-weight:600;}
+  .act.on{background:#1f5f3a;color:#fff;}
   .cnote{font-size:12px;color:var(--mut);margin-top:auto;padding-top:8px;}
 </style>
 </head>
@@ -477,13 +479,15 @@
   <div class="carimg"><img src="giorgio.png" alt=""><div class="hvb" id="hvB2"></div></div>
   <div class="carrow"><b id="cPct">--%</b><span id="cKm"></span><i class="plug" id="cPlug"><svg viewBox="0 0 22 30" fill="currentColor"><rect x="5" y="0" width="3" height="8" rx="1"/><rect x="14" y="0" width="3" height="8" rx="1"/><path d="M1 8h20v7a8 8 0 0 1-6 7.7V30h-8v-7.3A8 8 0 0 1 1 15z"/></svg></i></div>
   <div class="cbar"><i id="cBar"></i></div>
+  <div class="clim" id="cLim"></div>
   <div class="cgrid" id="cGrid"></div>
   <div class="cbtns">
     <div class="act hold" id="cHv" data-ms="1500"><span class="hf"></span><span class="ht">🔥 Voorverwarmen</span></div>
     <div class="act hold" id="cLock" data-ms="1500"><span class="hf"></span><span class="ht">🔒 Op slot</span></div>
     <div class="act hold red" id="cUnlock" data-ms="3000"><span class="hf"></span><span class="ht">🔓 Van het slot (3 sec)</span></div>
+    <div class="act" id="cFull">⚡ Eenmalig vol laden</div>
   </div>
-  <div class="cnote">Knoppen werken alleen als je ze ingedrukt houdt. De gegevens komen via Fiat en kunnen een kwartier achterlopen.</div>
+  <div class="cnote">Voorverwarmen en de slotknoppen werken alleen als je ze ingedrukt houdt. De gegevens komen via Fiat en kunnen een kwartier achterlopen.</div>
 </div></div>
 
 <!-- energie per apparaat -->
@@ -1340,6 +1344,8 @@ tap(document.querySelector('.tpanel'),function(){});
 
 /* ---------- giorgio (fiat 500e) ---------- */
 function carDev(){ return byName(CFG.car); }
+function varObj(n){ var r=null; each(S.vars,function(v){ if(v.name===n) r=v; }); return r; }
+function varVal(n){ var v=varObj(n); return v? v.value : null; }
 function capT(d,c){ var o=d&&d.capabilitiesObj&&d.capabilitiesObj[c]; return o&&o.lastUpdated? new Date(o.lastUpdated).getTime() : 0; }
 function whenTxt(t){ if(!t) return '--'; var d=new Date(t), n=new Date(), hm=pad(d.getHours())+':'+pad(d.getMinutes());
   if(d.toDateString()===n.toDateString()) return hm; var y=new Date(n.getTime()-86400000); if(d.toDateString()===y.toDateString()) return 'gisteren '+hm;
@@ -1356,23 +1362,28 @@ function renderCar(){
   var col= p===null? '#5c6270' : p>=30? 'var(--ok)' : p>=15? '#f59e0b' : 'var(--bad)';
   var upd=Math.max(capT(d,'measure_battery'),capT(d,'fiat_vehicle_measurement_distance_to_empty'),capT(d,'fiat_vehicle_measurement_odometer'));
   var stTxt= charging? 'Laadt'+(tFull? ' · vol over '+minTxt(tFull):'') : plugged? 'Aangesloten, laadt niet' : 'Niet aangesloten';
+  var est=varVal('Giorgio schatting'), showEst= plugged && est!==null && p!==null && Math.round(est)>Math.round(p);
+  var pTxt= p===null?'--%' : showEst? '≈'+Math.round(est)+'%' : Math.round(p)+'%', pBar= showEst? est : (p||0);
   var hv=hvLeft(), hvTxt= hv? '🔥 Voorverwarmen gestart om '+whenTxt(hv) : '';
   [['carPct','carKm','carPlug','carBar','hvB'],['cPct','cKm','cPlug','cBar','hvB2']].forEach(function(ids){
-    $(ids[0]).textContent= p===null?'--%':Math.round(p)+'%'; $(ids[0]).style.color= p!==null&&p<30? col : '';
+    $(ids[0]).textContent= pTxt; $(ids[0]).style.color= p!==null&&p<30? col : '';
     $(ids[1]).textContent= km===null?'':Math.round(km)+' km';
     $(ids[2]).className='plug '+(plugged?'on':'off');
-    $(ids[3]).style.width=(p||0)+'%'; $(ids[3]).style.background=col;
+    $(ids[3]).style.width=pBar+'%'; $(ids[3]).style.background=col;
     $(ids[4]).textContent=hvTxt; $(ids[4]).className='hvb'+(hv?' show':'');
   });
   $('carName').textContent=d.name; $('cName').textContent=d.name;
   $('carUpd').textContent='bijgewerkt '+whenTxt(upd);
   clearTimeout(hvTmr); if(hv) hvTmr=setTimeout(renderCar, hv+CFG.hvMin*60000-Date.now()+500);
   if($('carOv').className.indexOf('show')<0) return;
+  var lim=varVal('Giorgio limiet')||90, limOn=varVal('Giorgio limiet aan')===true, full=varVal('Giorgio vol laden')===true;
+  $('cLim').innerHTML= full? 'Laadlimiet: <b>uit, laadt deze keer vol tot 100 %</b>' : 'Laadlimiet: <b>'+lim+' %</b>'+(limOn?'':' · testmodus, stopt de laadpaal nog niet')+(showEst?' · ≈ = geschat, Fiat meldt '+Math.round(p)+' %':'');
+  $('cFull').className='act'+(full?' on':''); $('cFull').textContent= full? '⚡ Vol laden staat aan' : '⚡ Eenmalig vol laden';
   $('cSub').textContent='Fiat 500e · '+stTxt.toLowerCase()+' · bijgewerkt '+whenTxt(upd);
   var l2=cap(d,'fiat_vehicle_measurement_time_to_fully_charge_l2'), l3=cap(d,'fiat_vehicle_measurement_time_to_fully_charge_l3');
   var odo=cap(d,'fiat_vehicle_measurement_odometer'), svc=cap(d,'fiat_vehicle_measurement_distance_to_service'), al=cap(d,'alarm_battery');
-  var full= p!==null && p>=100;
-  var g=[['Laadstatus',stTxt],['Laadtijd laadpaal (thuis)', full?'vol':'nog '+minTxt(l2)],['Laadtijd snellader', full?'vol':'nog '+minTxt(l3)],
+  var full100= p!==null && p>=100;
+  var g=[['Laadstatus',stTxt],['Laadtijd laadpaal (thuis)', full100?'vol':'nog '+minTxt(l2)],['Laadtijd snellader', full100?'vol':'nog '+minTxt(l3)],
     ['Kilometerstand', odo===null?'--':Math.round(odo).toLocaleString('nl-NL')+' km'],['Onderhoud', svc===null?'--':'over '+Math.round(svc).toLocaleString('nl-NL')+' km'],
     ['Accuwaarschuwing', al?'<b class="bad">Let op!</b>':'<b>Geen</b>']];
   $('cGrid').innerHTML=g.map(function(x){ return '<div><small>'+x[0]+'</small>'+(x[1].indexOf('<b')===0?x[1]:'<b>'+esc(x[1])+'</b>')+'</div>'; }).join('');
@@ -1391,6 +1402,12 @@ function preheat(){ carAct('fiat_vehicle_action_hvac','Voorverwarmen gestart',fu
 holdBtn($('carHv'),preheat); holdBtn($('cHv'),preheat);
 holdBtn($('cLock'),function(){ carAct('fiat_vehicle_action_lock',CFG.car+' gaat op slot'); });
 holdBtn($('cUnlock'),function(){ carAct('fiat_vehicle_action_unlock',CFG.car+' gaat van het slot'); });
+tap($('cFull'),function(){ var v=varObj('Giorgio vol laden'); if(!v){ showErr('Variabele Giorgio vol laden niet gevonden'); return; }
+  var nv=!(v.value===true); v.value=nv; renderCar();
+  api('PUT','manager/logic/variable/'+v.id,{value:nv}).then(function(){
+    toast(nv?'Laadt deze keer vol tot 100 %':'Laadlimiet weer actief');
+    var ev=byName(CFG.ev); if(nv && ev && /^plugged_in/.test(cap(ev,'evcharger_charging_state')||'') && cap(ev,'evcharger_charging')!==true) return setCap(ev.id,'evcharger_charging',true);
+  }).catch(function(e){ showErr('Vol laden: '+e.message); }); });
 var carTimer=null;
 function openCar(){ $('carOv').className='ov show'; renderCar(); clearTimeout(carTimer); carTimer=setTimeout(closeCar,180000); }
 function closeCar(){ $('carOv').className='ov'; clearTimeout(carTimer); }
@@ -1572,7 +1589,7 @@ setInterval(function(){ if(doorOpen || alarmOn || Date.now()-bootT < 3*3600000) 
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
   .then(function(t){ if(t && t.indexOf('var VERSION=')>=0) location.reload(); }).catch(function(){}); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-27-v32';
+var VERSION='2026-11-27-v33';
 try{ document.getElementById('ver').textContent=VERSION.replace(/^\d{4}-/,''); }catch(e){}
 setInterval(function(){
   if(DEMO) return;
@@ -1588,8 +1605,8 @@ function demoApi(method,path){
   if(path.indexOf('autocomplete')>=0) return [{id:'21',name:'NPO Radio 2',description:'TuneIn Station'},{id:'13',name:'Omroep Zeeland',description:'TuneIn-station'},{id:'23',name:'Sublime FM',description:'TuneIn Station'},{id:'17',name:'Top Tracks',description:'Spotify-afspeellijst'},{id:'30',name:'Mijn Mix',description:'YouTube Music'}];
   if(path.indexOf('moods')>=0) return {m1:{name:'Verguld'},m2:{name:'Oosters'}};
   if(path.indexOf('advancedflow')>=0) return {f1:{name:CFG.cookFlow},f2:{name:CFG.nightFlow},f3:{name:CFG.allOffFlow},f4:{name:CFG.garlandOnFlow},f5:{name:CFG.garlandOffFlow}};
-  if(path.indexOf('logic/variable/')>=0 && path.split('/').length>3) return {value:false};
-  if(path.indexOf('logic')>=0) return {v1:{name:'Deurbel',value:false}};
+  if(/logic\/variable\/[^\/]+$/.test(path)) return {value:false};
+  if(path.indexOf('logic')>=0) return {v1:{name:'Deurbel',value:false},v2:{name:'Giorgio schatting',value:83.4},v3:{name:'Giorgio limiet',value:90},v4:{name:'Giorgio limiet aan',value:false},v5:{name:'Giorgio vol laden',value:false}};
   if(path.indexOf('users')>=0) return {a:{name:'Jessica Van Houte',present:false,role:'user'},b:{name:'Dennis Verstraate',present:true,role:'owner'}};
   if(path.indexOf('devices')>=0){
     var D={}, n=0;
