@@ -281,6 +281,43 @@
   .sleep{position:fixed;left:0;top:0;right:0;bottom:0;background:#000;z-index:30;display:none;}
   .sleep.show{display:block;}
   .toast{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:#22303f;padding:8px 16px;border-radius:10px;font-size:14px;display:none;z-index:20;}
+
+  /* giorgio */
+  .carimg{position:relative;height:108px;margin:2px 0 4px;}
+  .carimg img{width:100%;height:100%;object-fit:contain;display:block;}
+  .hvb{position:absolute;left:0;right:0;top:50%;margin-top:-17px;background:rgba(22,101,52,.94);border:1px solid #2fbf68;border-radius:10px;
+    padding:7px 8px;font-size:13px;font-weight:600;text-align:center;display:none;}
+  .hvb.show{display:block;}
+  .carrow{display:flex;align-items:center;}
+  .carrow b{font-size:28px;font-weight:600;margin-right:10px;}
+  .carrow span{color:var(--mut);font-size:15px;flex:1;}
+  .plug{width:22px;height:30px;flex:none;}
+  .plug.on{color:#2fbf68;} .plug.off{color:var(--bad);}
+  .cbar{height:8px;border-radius:4px;background:#2c313c;margin:6px 0 10px;overflow:hidden;}
+  .cbar i{display:block;height:100%;border-radius:4px;background:var(--ok);width:0;}
+  .cst{font-size:12px;color:var(--mut);margin:-4px 0 8px;}
+  .hold{position:relative;}
+  .hold .hf{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(245,140,40,.55);}
+  .hold.go .hf{width:100%;-webkit-transition-property:width;transition-property:width;-webkit-transition-timing-function:linear;transition-timing-function:linear;}
+  .hold .ht{position:relative;}
+  .hold.red{background:#3a2226;} .hold.red .hf{background:rgba(255,90,90,.6);}
+  .cupd{font-size:10px;color:#5c6270;text-align:right;margin-top:5px;}
+  .panel.cpanel{width:1000px;height:720px;max-height:none;overflow:hidden;display:flex;flex-direction:column;padding:18px 22px;}
+  .cpanel .hd{display:flex;justify-content:space-between;align-items:flex-start;}
+  .cpanel .hd h2{margin:0;font-size:30px;} .cpanel .hd small{display:block;color:var(--mut);font-size:14px;margin-top:2px;}
+  .cpanel .x{font-size:16px;font-weight:500;background:rgba(255,255,255,.1);padding:10px 18px;border-radius:12px;}
+  .cpanel .carimg{height:250px;margin:0 0 6px;}
+  .cpanel .hvb{left:220px;right:220px;font-size:17px;padding:10px;margin-top:-22px;}
+  .cpanel .carrow b{font-size:46px;} .cpanel .carrow span{font-size:20px;}
+  .cpanel .plug{width:30px;height:42px;}
+  .cpanel .cbar{height:12px;border-radius:6px;margin:8px 0 14px;}
+  .cgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:10px;}
+  .cgrid div{background:var(--card2);border-radius:14px;padding:10px 14px;}
+  .cgrid small{display:block;color:var(--mut);font-size:13px;} .cgrid b{display:block;font-size:20px;font-weight:600;margin-top:3px;}
+  .cgrid b.bad{color:var(--bad);}
+  .cbtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:10px;margin-top:14px;}
+  .cbtns .act{height:56px;font-size:16px;}
+  .cnote{font-size:12px;color:var(--mut);margin-top:auto;padding-top:8px;}
 </style>
 </head>
 <body>
@@ -360,6 +397,14 @@
       <div class="sep"></div>
       <div class="erow"><span>Laadpaal</span><b id="ev">--</b></div>
     </div>
+    <div class="card" id="carCard">
+      <div class="lbl"><span id="carName">Giorgio</span><span>meer ›</span></div>
+      <div class="carimg"><img src="giorgio.png" alt=""><div class="hvb" id="hvB"></div></div>
+      <div class="carrow"><b id="carPct">--%</b><span id="carKm"></span><i class="plug" id="carPlug"><svg viewBox="0 0 22 30" fill="currentColor"><rect x="5" y="0" width="3" height="8" rx="1"/><rect x="14" y="0" width="3" height="8" rx="1"/><path d="M1 8h20v7a8 8 0 0 1-6 7.7V30h-8v-7.3A8 8 0 0 1 1 15z"/></svg></i></div>
+      <div class="cbar"><i id="carBar"></i></div>
+      <div class="act hold" id="carHv" data-ms="1500"><span class="hf"></span><span class="ht">Voorverwarmen (vasthouden)</span></div>
+      <div class="cupd" id="carUpd"></div>
+    </div>
   </div>
 </div></div>
 
@@ -425,6 +470,21 @@
 <div class="ov door" id="door"><img id="doorImg" alt="">
   <div class="bar2"><div id="doorTitle">🔔 Er staat iemand voor de deur</div><div class="x">Sluiten</div></div><div class="live" id="liveTag">● LIVE</div>
 </div>
+
+<!-- giorgio -->
+<div class="ov" id="carOv"><div class="panel cpanel">
+  <div class="hd"><div><h2 id="cName">Giorgio</h2><small id="cSub"></small></div><div class="x" id="carClose">Sluiten</div></div>
+  <div class="carimg"><img src="giorgio.png" alt=""><div class="hvb" id="hvB2"></div></div>
+  <div class="carrow"><b id="cPct">--%</b><span id="cKm"></span><i class="plug" id="cPlug"><svg viewBox="0 0 22 30" fill="currentColor"><rect x="5" y="0" width="3" height="8" rx="1"/><rect x="14" y="0" width="3" height="8" rx="1"/><path d="M1 8h20v7a8 8 0 0 1-6 7.7V30h-8v-7.3A8 8 0 0 1 1 15z"/></svg></i></div>
+  <div class="cbar"><i id="cBar"></i></div>
+  <div class="cgrid" id="cGrid"></div>
+  <div class="cbtns">
+    <div class="act hold" id="cHv" data-ms="1500"><span class="hf"></span><span class="ht">🔥 Voorverwarmen</span></div>
+    <div class="act hold" id="cLock" data-ms="1500"><span class="hf"></span><span class="ht">🔒 Op slot</span></div>
+    <div class="act hold red" id="cUnlock" data-ms="3000"><span class="hf"></span><span class="ht">🔓 Van het slot (3 sec)</span></div>
+  </div>
+  <div class="cnote">Knoppen werken alleen als je ze ingedrukt houdt. De gegevens komen via Fiat en kunnen een kwartier achterlopen.</div>
+</div></div>
 
 <!-- energie per apparaat -->
 <div class="ov" id="enOv"><div class="panel epanel">
@@ -509,7 +569,7 @@ var CFG = {
   temps: [['Temp Keuken','Keuken'],['Temp Entree','Entree'],['Temp Slaapkamer','Slaapkamer'],['Temp Kantoor','Kantoor'],
           ['Temp Wasruimte','Wasruimte'],['Temp Garage','Garage'],['Temp Domein Jes','Domein Jes']],
   mainTemp: 'Temp Woonkamer',
-  p1: 'P1 Meter', enFeatured: ['Airco woonkamer','Airco slaapkamer','Laadpaal'], prices: 'Energieprijzen', ev: 'Laadpaal',
+  p1: 'P1 Meter', enFeatured: ['Airco woonkamer','Airco slaapkamer','Laadpaal'], prices: 'Energieprijzen', ev: 'Laadpaal', car: 'Giorgio', hvMin: 5,
   robot: 'Jacqueline', robotKitchenRooms: 'keuken,washok', routines: [['Stofzuigen, dan dweilen','Alles'],['Keuken dweil','Keuken'],['Woonkamer','Woonkamer'],['Begaande grond','Begane grond']],
   musicZone: 'Keuken',
   motion: 'Beweging keuken',
@@ -609,7 +669,7 @@ function musicDev(){
 }
 
 function renderAll(){ if(cur===4) renderLights();
- renderActs(); renderPeople(); renderTemps(); renderEnergy(); renderRobot(); renderMusic(); if(cur===2) renderPlayers(); }
+ renderActs(); renderPeople(); renderTemps(); renderEnergy(); renderCar(); renderRobot(); renderMusic(); if(cur===2) renderPlayers(); }
 
 /* ---------- verlichting ---------- */
 function triggerFlow(name,msg){
@@ -1278,6 +1338,64 @@ tap($('tClose'),closeTemps);
 tap($('tempOv'),closeTemps);
 tap(document.querySelector('.tpanel'),function(){});
 
+/* ---------- giorgio (fiat 500e) ---------- */
+function carDev(){ return byName(CFG.car); }
+function capT(d,c){ var o=d&&d.capabilitiesObj&&d.capabilitiesObj[c]; return o&&o.lastUpdated? new Date(o.lastUpdated).getTime() : 0; }
+function whenTxt(t){ if(!t) return '--'; var d=new Date(t), n=new Date(), hm=pad(d.getHours())+':'+pad(d.getMinutes());
+  if(d.toDateString()===n.toDateString()) return hm; var y=new Date(n.getTime()-86400000); if(d.toDateString()===y.toDateString()) return 'gisteren '+hm;
+  return d.getDate()+' '+MON[d.getMonth()]+' '+hm; }
+function minTxt(m){ if(m===null||m===undefined) return '--'; m=Math.round(m); return m<60? m+' min' : Math.floor(m/60)+' u '+pad(m%60); }
+function hvLeft(){ var t=Number(store.get('hvStart')||0); return t && Date.now()-t < CFG.hvMin*60000 ? t : 0; }
+var hvTmr=null;
+function renderCar(){
+  var d=carDev(), card=$('carCard'); if(!d){ card.style.display='none'; return; } card.style.display='';
+  var p=cap(d,'measure_battery'), km=cap(d,'fiat_vehicle_measurement_distance_to_empty'), st=cap(d,'ev_charging_state');
+  var plugged= cap(d,'fiat_vehicle_state_plugged_in')===true || /^plugged_in/.test(st||'');
+  var charging= st==='plugged_in_charging' || cap(d,'battery_charging_state')==='charging';
+  var lvl=cap(d,'fiat_vehicle_state_charging_level'), tFull= /3/.test(lvl||'') ? cap(d,'fiat_vehicle_measurement_time_to_fully_charge_l3') : cap(d,'fiat_vehicle_measurement_time_to_fully_charge_l2');
+  var col= p===null? '#5c6270' : p>=30? 'var(--ok)' : p>=15? '#f59e0b' : 'var(--bad)';
+  var upd=Math.max(capT(d,'measure_battery'),capT(d,'fiat_vehicle_measurement_distance_to_empty'),capT(d,'fiat_vehicle_measurement_odometer'));
+  var stTxt= charging? 'Laadt'+(tFull? ' · vol over '+minTxt(tFull):'') : plugged? 'Aangesloten, laadt niet' : 'Niet aangesloten';
+  var hv=hvLeft(), hvTxt= hv? '🔥 Voorverwarmen gestart om '+whenTxt(hv) : '';
+  [['carPct','carKm','carPlug','carBar','hvB'],['cPct','cKm','cPlug','cBar','hvB2']].forEach(function(ids){
+    $(ids[0]).textContent= p===null?'--%':Math.round(p)+'%'; $(ids[0]).style.color= p!==null&&p<30? col : '';
+    $(ids[1]).textContent= km===null?'':Math.round(km)+' km';
+    $(ids[2]).className='plug '+(plugged?'on':'off');
+    $(ids[3]).style.width=(p||0)+'%'; $(ids[3]).style.background=col;
+    $(ids[4]).textContent=hvTxt; $(ids[4]).className='hvb'+(hv?' show':'');
+  });
+  $('carName').textContent=d.name; $('cName').textContent=d.name;
+  $('carUpd').textContent='bijgewerkt '+whenTxt(upd);
+  clearTimeout(hvTmr); if(hv) hvTmr=setTimeout(renderCar, hv+CFG.hvMin*60000-Date.now()+500);
+  if($('carOv').className.indexOf('show')<0) return;
+  $('cSub').textContent='Fiat 500e · '+stTxt.toLowerCase()+' · bijgewerkt '+whenTxt(upd);
+  var l2=cap(d,'fiat_vehicle_measurement_time_to_fully_charge_l2'), l3=cap(d,'fiat_vehicle_measurement_time_to_fully_charge_l3');
+  var odo=cap(d,'fiat_vehicle_measurement_odometer'), svc=cap(d,'fiat_vehicle_measurement_distance_to_service'), al=cap(d,'alarm_battery');
+  var full= p!==null && p>=100;
+  var g=[['Laadstatus',stTxt],['Laadtijd laadpaal (thuis)', full?'vol':'nog '+minTxt(l2)],['Laadtijd snellader', full?'vol':'nog '+minTxt(l3)],
+    ['Kilometerstand', odo===null?'--':Math.round(odo).toLocaleString('nl-NL')+' km'],['Onderhoud', svc===null?'--':'over '+Math.round(svc).toLocaleString('nl-NL')+' km'],
+    ['Accuwaarschuwing', al?'<b class="bad">Let op!</b>':'<b>Geen</b>']];
+  $('cGrid').innerHTML=g.map(function(x){ return '<div><small>'+x[0]+'</small>'+(x[1].indexOf('<b')===0?x[1]:'<b>'+esc(x[1])+'</b>')+'</div>'; }).join('');
+}
+function carAct(c,msg,after){ var d=carDev(); if(!d){ showErr(CFG.car+' niet gevonden in Homey'); return; }
+  setCap(d.id,c,true).then(function(){ toast(msg); if(after) after(); }).catch(function(e){ showErr(CFG.car+': '+e.message); }); }
+function holdBtn(el,fn){ if(!el) return; var t=null, done=false, ms=Number(el.getAttribute('data-ms'))||1500;
+  function down(e){ if(e) e.preventDefault(); done=false; el.querySelector('.hf').style.webkitTransitionDuration=ms+'ms'; el.querySelector('.hf').style.transitionDuration=ms+'ms';
+    el.className=el.className.replace(/ go/g,'')+' go'; clearTimeout(t); t=setTimeout(function(){ done=true; fn(); setTimeout(reset,600); },ms); }
+  function up(){ if(t && !done){ clearTimeout(t); reset(); toast('Houd de knop ingedrukt'); } t=null; }
+  function reset(){ var hf=el.querySelector('.hf'); hf.style.webkitTransitionDuration='0ms'; hf.style.transitionDuration='0ms'; el.className=el.className.replace(/ go/g,''); }
+  el.addEventListener('touchstart',down); el.addEventListener('touchend',up); el.addEventListener('touchcancel',up);
+  el.addEventListener('mousedown',down); el.addEventListener('mouseup',up); el.addEventListener('mouseleave',function(){ if(t&&!done){ clearTimeout(t); reset(); t=null; } });
+  tap(el,function(){}); }
+function preheat(){ carAct('fiat_vehicle_action_hvac','Voorverwarmen gestart',function(){ store.set('hvStart',String(Date.now())); renderCar(); }); }
+holdBtn($('carHv'),preheat); holdBtn($('cHv'),preheat);
+holdBtn($('cLock'),function(){ carAct('fiat_vehicle_action_lock',CFG.car+' gaat op slot'); });
+holdBtn($('cUnlock'),function(){ carAct('fiat_vehicle_action_unlock',CFG.car+' gaat van het slot'); });
+var carTimer=null;
+function openCar(){ $('carOv').className='ov show'; renderCar(); clearTimeout(carTimer); carTimer=setTimeout(closeCar,180000); }
+function closeCar(){ $('carOv').className='ov'; clearTimeout(carTimer); }
+tap($('carCard'),openCar); tap($('carClose'),closeCar); tap($('carOv'),closeCar); tap(document.querySelector('.cpanel'),function(){});
+
 /* ---------- energie per apparaat ---------- */
 var enTimer=null, enRefresh=null;
 function openEn(){ $('enOv').className='ov show'; $('enList').innerHTML='<div class="tmsg">Laden…</div>'; $('enTop').innerHTML='';
@@ -1454,7 +1572,7 @@ setInterval(function(){ if(doorOpen || alarmOn || Date.now()-bootT < 3*3600000) 
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
   .then(function(t){ if(t && t.indexOf('var VERSION=')>=0) location.reload(); }).catch(function(){}); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-26-v31';
+var VERSION='2026-11-27-v32';
 try{ document.getElementById('ver').textContent=VERSION.replace(/^\d{4}-/,''); }catch(e){}
 setInterval(function(){
   if(DEMO) return;
@@ -1486,6 +1604,8 @@ function demoApi(method,path){
     C('Stroom kosten',{meter_money_this_day:4.12},{driverId:'homey:app:com.gruijter.powerhour:power'});
     C('Gas kosten',{meter_money_this_day:1.18},{driverId:'homey:app:com.gruijter.powerhour:gas'});
     C('Laadpaal',{measure_power:7400,evcharger_charging:true,evcharger_charging_state:'plugged_in_charging'});
+    var gi=C('Giorgio',{measure_battery:78,alarm_battery:false,battery_charging_state:'charging',ev_charging_state:'plugged_in_charging',fiat_vehicle_measurement_distance_to_empty:184,fiat_vehicle_measurement_distance_to_service:3861,fiat_vehicle_measurement_odometer:53374,fiat_vehicle_measurement_time_to_fully_charge_l2:58,fiat_vehicle_measurement_time_to_fully_charge_l3:10,fiat_vehicle_state_plugged_in:true,fiat_vehicle_state_charging_level:'LEVEL_2'},{'class':'car'});
+    gi.capabilitiesObj.measure_battery.lastUpdated=Date.now()-14*60000;
     C('Lampjes voortuin',{onoff:true});
     var jr=C('Jacqueline',{is_cleaning:false,dock:true,measure_battery:100,battery_charging_state:'charging',clean_area:51.9,clean_time:0.97,mop_attached:true,clean_room_pick:null}); jr.capabilitiesObj.clean_room_pick.values=[{id:'1',title:'woonkamer'},{id:'2',title:'keuken'}];
     var sp=[['Keuken','com.sonos',true,'Mr. Brightside','The Killers','z2'],['Sonos Woonkamer','com.sonos',false,'Homey',null,'z1'],['Sonos Badkamer','com.sonos',false,null,null,'x'],
