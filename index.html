@@ -62,6 +62,7 @@
 
   /* knoppen */
   .acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:8px;}
+  .acts.acts4{grid-template-columns:repeat(2,minmax(0,1fr));}
   .act{background:var(--card2);border-radius:13px;height:48px;overflow:hidden;display:flex;align-items:center;justify-content:center;
     font-size:14px;font-weight:600;line-height:1.15;text-align:center;padding:0 6px;}
   .act .i{font-size:18px;margin-right:6px;line-height:1;}
@@ -75,11 +76,12 @@
 
   /* roborock */
   .robo{display:flex;align-items:center;}
+  .robo .rimg{width:50px;height:50px;flex:none;margin-right:12px;}
   .robo .st{flex:1;font-size:14px;}
   .robo .st b{display:block;font-size:15px;margin-bottom:2px;}
   .robo .st span{color:var(--mut);}
   .robo .st .warn{color:#ffb35c;}
-  .rbtns{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 50px;grid-gap:6px;margin-top:10px;}
+  .rbtns{display:grid;grid-template-columns:1fr 1fr 1fr 50px;grid-gap:6px;margin-top:10px;}
   .rbtns .act{font-size:13px;padding:0 4px;text-align:center;line-height:1.15;}
   .rbtns .act{height:44px;}
 
@@ -115,8 +117,8 @@
   /* scherm 2 */
   .s2{height:100%;padding:14px;display:flex;flex-direction:column;}
   .s2head{display:flex;align-items:center;margin-bottom:12px;}
-  .back{background:var(--card);border-radius:12px;padding:10px 16px;font-size:16px;font-weight:600;}
-  .s2head h1{font-size:24px;margin:0 0 0 16px;font-weight:600;}
+  .back{margin-left:auto;background:rgba(255,255,255,.1);border-radius:12px;padding:10px 18px;font-size:16px;font-weight:500;}
+  .s2head h1{font-size:24px;margin:0;font-weight:600;}
   .players{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:12px;}
   .players.small{grid-template-columns:repeat(4,minmax(0,1fr));grid-gap:8px;margin-top:10px;}
   .players.small .pl{padding:8px 10px;}
@@ -268,8 +270,9 @@
   .ehd{display:flex;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;padding:0 6px 4px;}
 
   /* alarmstatus */
+  .alst .sh{width:13px;height:14px;vertical-align:-2px;margin-right:5px;}
   .alst{float:right;text-transform:none;letter-spacing:0;font-weight:600;padding:2px 8px;border-radius:8px;margin-top:-3px;}
-  .alst.uit{color:#8a90a0;background:#252a33;} .alst.aan{color:#ffd0d0;background:#6b1d24;} .alst.vertrek,.alst.binnenkomst{color:#1a1300;background:#f2a93b;}
+  .alst.uit{color:#c9ced8;background:#2c313c;} .alst.aan{color:#ffd0d0;background:#6b1d24;} .alst.vertrek,.alst.binnenkomst{color:#1a1300;background:#f2a93b;}
   .ov.arm{z-index:25;background:rgba(150,80,0,.95);text-align:center;}
   .ov.arm.ok{background:rgba(20,110,60,.95);}
   .arm .ai{font-size:90px;margin-top:120px;} .arm h1{font-size:46px;margin:12px 0 8px;} .arm p{font-size:22px;opacity:.9;margin:0;}
@@ -375,20 +378,18 @@
     </div>
     <div class="card">
       <div class="lbl" id="lightHead"><span>Verlichting</span><span>alle lampen ›</span></div>
-      <div class="acts">
+      <div class="acts acts4">
         <div class="act cook" id="cook"><span class="i">🍳</span>Kookmodus</div>
         <div class="act night" id="night"><span class="i">🌙</span>Nachtstand</div>
-        <div class="act off" id="alloff"><svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px"><path d="M12 3v9" stroke="#8a90a0" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0" stroke="#8a90a0" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>Alles uit</div>
-        <div class="act" data-mood="Verguld"><span class="dot" style="background:#e8b04a"></span>Verguld</div>
-        <div class="act" data-mood="Oosters"><span class="dot" style="background:#e0583a"></span>Oosters</div>
-        <div class="act lamp" id="garland"><svg width="26" height="17" viewBox="0 0 34 22"><path d="M1 4 Q9 13 17 6 Q25 0 33 9" fill="none" stroke="#9aa0ad" stroke-width="1.5"/><ellipse cx="5" cy="11" rx="2.6" ry="3.6" fill="#ffcf4a"/><ellipse cx="12" cy="13" rx="2.6" ry="3.6" fill="#ff6b6b"/><ellipse cx="20" cy="9" rx="2.6" ry="3.6" fill="#5fd38d"/><ellipse cx="28" cy="10" rx="2.6" ry="3.6" fill="#7cc4ff"/></svg>Lampjes voortuin</div>
+        <div class="act" data-mood="Verguld" data-lbl="Aan"><span class="dot" style="background:#e8b04a"></span>Aan</div>
+        <div class="act off" id="alloff"><svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px"><path d="M12 3v9" stroke="#8a90a0" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0" stroke="#8a90a0" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>Uit</div>
       </div>
     </div>
     <div class="card">
       <div class="lbl" id="roboHead"><span>Jacqueline</span><span>meer ›</span></div>
-      <div class="robo"><div class="st" id="roboSt"><b>--</b><span></span></div></div>
+      <div class="robo"><svg class="rimg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#eef0f3" stroke="#aeb4bf" stroke-width="2"/><path d="M8 24 A26 26 0 0 1 56 24" fill="none" stroke="#c9ced6" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="32" r="21" fill="#f8f9fa" stroke="#dde1e6" stroke-width="1"/><circle cx="32" cy="22" r="7.5" fill="#e3e6eb" stroke="#9aa0ab" stroke-width="1.5"/><circle cx="32" cy="22" r="2.6" fill="#3d8fe0"/><rect x="26" y="40" width="12" height="3" rx="1.5" fill="#c3c8d0"/><circle cx="20" cy="38" r="1.6" fill="#2fbf68"/></svg><div class="st" id="roboSt"><b>--</b><span></span></div></div>
       <div class="rbtns">
-        <div class="act" data-rt="0">Alles</div><div class="act" data-rt="1">Keuken</div><div class="act" data-rt="2">Woonkamer</div><div class="act" data-rt="3">Begane grond</div>
+        <div class="act" data-rt="0">Alles</div><div class="act" data-rt="1">Keuken</div><div class="act" data-rt="2">Woonkamer</div>
         <div class="act off" id="roboStop"><svg width="12" height="12" viewBox="0 0 12 12"><rect width="12" height="12" rx="2" fill="#8a90a0"/></svg></div>
       </div>
     </div>
@@ -434,7 +435,7 @@
 
 <!-- ================= SCHERM 2: MUZIEK ================= -->
 <div class="screen" id="scr2"><div class="s2">
-  <div class="s2head"><div class="back" id="back">‹ Thuis</div><h1>Muziek</h1></div>
+  <div class="s2head"><h1>Muziek</h1><div class="back" id="back">Sluiten</div></div>
   <div class="players" id="players"></div>
   <div class="players small" id="players2"></div>
   <div class="favs">
@@ -446,7 +447,7 @@
 
 <!-- ================= SCHERM 3: ROBOROCK ================= -->
 <div class="screen" id="scr3"><div class="s3">
-  <div class="s2head"><div class="back" id="back3">‹ Thuis</div><h1>Jacqueline</h1></div>
+  <div class="s2head"><h1>Jacqueline</h1><div class="back" id="back3">Sluiten</div></div>
   <div class="body">
     <div class="mapc"><img id="rMap" alt=""><div class="tag">Kaart</div></div>
     <div class="rside">
@@ -482,7 +483,7 @@
 
 <!-- ================= SCHERM 4: VERLICHTING ================= -->
 <div class="screen" id="scr4"><div class="s4">
-  <div class="s2head"><div class="back" id="back4">‹ Thuis</div><h1>Verlichting</h1></div>
+  <div class="s2head"><h1>Verlichting</h1><div class="back" id="back4">Sluiten</div></div>
   <div class="s4top" id="lTop"></div>
   <div class="lscroll" id="lList"></div>
 </div></div>
@@ -707,10 +708,10 @@ function triggerFlow(name,msg){
   return api('POST','manager/flow/advancedflow/'+id+'/trigger').then(function(){ setTimeout(loadLive,1500); })
     .catch(function(e){ showErr(e.message); });
 }
-function setMood(name){
+function setMood(name,lbl){
   var id=null; each(S.moods,function(m,k){ if(m.name===name) id=k; });
   if(!id){ showErr('Mood "'+name+'" niet gevonden'); return; }
-  store.set('kookPrev',''); renderActs(); toast(name+' aan');
+  store.set('kookPrev',''); renderActs(); toast(lbl==='Aan'?'Verlichting aan':name+' aan');
   api('POST','manager/moods/mood/'+id+'/set').then(function(){ setTimeout(loadLive,1200); }).catch(function(e){ showErr(e.message); });
 }
 var COOK_CAPS=['light_mode','light_hue','light_saturation','light_temperature','dim','onoff'];
@@ -750,7 +751,7 @@ function renderActs(){
   var p=cookPrev(), c=$('cook');
   c.className='act cook'+(p?' on':'');
   c.innerHTML='<span class="i">🍳</span>'+(p?'Kookmodus uit':'Kookmodus');
-  $('garland').className='act lamp'+(cap(byName(CFG.garland),'onoff')?' on':'');
+  if($('garland')) $('garland').className='act lamp'+(cap(byName(CFG.garland),'onoff')?' on':'');
 }
 
 /* ---------- scherm 4: alle lampen ---------- */
@@ -1139,9 +1140,12 @@ function renderFavs(){
 }
 
 /* ---------- schermen wisselen ---------- */
-var cur=1, mapTimer=null;
+var cur=1, mapTimer=null, idleT=null;
+function idleHome(){ if(cur!==1) go(1); closeCar(); closeEn(); closeWx(); closeTemps(); }
+function resetIdle(){ clearTimeout(idleT); idleT=setTimeout(idleHome,180000); }
+document.addEventListener('touchstart',resetIdle,{passive:true}); document.addEventListener('mousedown',resetIdle);
 function go(n){
-  cur=n;
+  cur=n; resetIdle();
   [1,2,3,4].forEach(function(i){ $('scr'+i).className='screen'+(n===i?' show':''); $('d'+i).className=(n===i?'on':''); });
   if(n===2){ renderPlayers(); if(!S.favs.length) loadFavs(); }
   clearInterval(mapTimer);
@@ -1257,8 +1261,11 @@ var armSt=null, armSince=0, armTimer=null, armHidden=false;
 function armState(s){
   if(s===armSt) return;
   var prev=armSt; armSt=s; armSince=Date.now(); armHidden=false;
-  var lbl={uit:'🔓 Alarm uit',aan:'🔒 Alarm aan',vertrek:'⏳ Alarm gaat aan',binnenkomst:'⚠︎ Binnenkomst'}[s]||s;
-  var e=$('alState'); e.textContent=lbl; e.className='alst '+s;
+  var SH='<svg viewBox="0 0 20 22" class="sh"><path d="M10 1 L18 4 V10 C18 15.5 14.5 19.5 10 21 C5.5 19.5 2 15.5 2 10 V4 Z" ';
+  var lbl={uit:SH+'fill="none" stroke="currentColor" stroke-width="2"/><line x1="3" y1="2" x2="17" y2="20" stroke="currentColor" stroke-width="2"/></svg>UIT',
+    aan:SH+'fill="currentColor"/><path d="M6 11 L9 14 L14 8" fill="none" stroke="#6b1d24" stroke-width="2.4"/></svg>AAN',
+    vertrek:'⏳ Alarm gaat aan',binnenkomst:'⚠︎ Binnenkomst'}[s]||esc(s);
+  var e=$('alState'); e.innerHTML=lbl; e.className='alst '+s;
   clearInterval(armTimer);
   if(s==='vertrek' || s==='binnenkomst'){ wake(); armTimer=setInterval(armTick,250); armTick(); }
   else if(s==='uit' && (prev==='binnenkomst' || prev==='aan' || prev==='vertrek') && prev!==null){
@@ -1314,8 +1321,8 @@ tap($('sSave'),function(){
 tap($('cook'),toggleCook);
 tap($('night'),function(){ store.set('kookPrev',''); renderActs(); triggerFlow(CFG.nightFlow,'Nachtstand'); });
 tap($('alloff'),function(){ store.set('kookPrev',''); renderActs(); triggerFlow(CFG.allOffFlow,'Alle lampen uit'); });
-tap($('garland'),toggleGarland);
-Array.prototype.forEach.call(document.querySelectorAll('[data-mood]'),function(el){ tap(el,function(){ setMood(el.getAttribute('data-mood')); }); });
+if($('garland')) tap($('garland'),toggleGarland);
+Array.prototype.forEach.call(document.querySelectorAll('[data-mood]'),function(el){ tap(el,function(){ setMood(el.getAttribute('data-mood'),el.getAttribute('data-lbl')); }); });
 Array.prototype.forEach.call(document.querySelectorAll('[data-rt]'),function(el){ var r=CFG.routines[+el.getAttribute('data-rt')];
   if(!r){ el.style.display='none'; return; } el.innerHTML=esc(r[1]); tap(el,function(){ runRoutine(r[0]); }); });
 tap($('roboStop'),function(){ robo('stop_clean',{},'Jacqueline stopt').then(function(){ return robo('dock',{}); }); });
@@ -1422,14 +1429,14 @@ tap($('cFull'),function(){ var v=varObj('Giorgio vol laden'); if(!v){ showErr('V
     var ev=byName(CFG.ev); if(nv && ev && /^plugged_in/.test(cap(ev,'evcharger_charging_state')||'') && cap(ev,'evcharger_charging')!==true) return setCap(ev.id,'evcharger_charging',true);
   }).catch(function(e){ showErr('Vol laden: '+e.message); }); });
 var carTimer=null;
-function openCar(){ $('carOv').className='ov show'; renderCar(); clearTimeout(carTimer); carTimer=setTimeout(closeCar,180000); }
+function openCar(){ $('carOv').className='ov show'; renderCar(); resetIdle(); }
 function closeCar(){ $('carOv').className='ov'; clearTimeout(carTimer); }
 tap($('carCard'),openCar); tap($('carClose'),closeCar); tap($('carOv'),closeCar); tap(document.querySelector('.cpanel'),function(){});
 
 /* ---------- energie per apparaat ---------- */
 var enTimer=null, enRefresh=null;
 function openEn(){ $('enOv').className='ov show'; $('enList').innerHTML='<div class="tmsg">Laden…</div>'; $('enTop').innerHTML='';
-  loadEn(); clearInterval(enRefresh); enRefresh=setInterval(loadEn,15000); clearTimeout(enTimer); enTimer=setTimeout(closeEn,180000); }
+  loadEn(); clearInterval(enRefresh); enRefresh=setInterval(loadEn,15000); resetIdle(); }
 function closeEn(){ $('enOv').className='ov'; clearInterval(enRefresh); clearTimeout(enTimer); }
 function liveTree(zone, out, zname){ // live vermogen per apparaat, zone voor zone
   return api('GET','manager/energy/live'+(zone?'?zone='+zone:'')).then(function(r){
@@ -1492,7 +1499,7 @@ function openWx(){
   if($('setupOv').className.indexOf('show')>=0) return;
   $('wxOv').className='ov show'; $('wHrs').innerHTML='<div>Laden…</div>'; $('wDays').innerHTML='';
   $('wRadar').src= DEMO ? '' : CFG.radarUrl+'&t='+Math.floor(Date.now()/300000);
-  clearTimeout(wxTimer); wxTimer=setTimeout(closeWx,180000);
+  resetIdle();
   if(DEMO){ renderWx(demoWx()); return; }
   var u='https://api.open-meteo.com/v1/forecast?latitude='+CFG.wxLat+'&longitude='+CFG.wxLon+
     '&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,is_day&forecast_hours=13'+
@@ -1593,7 +1600,7 @@ tap($('kAc'),function(e){ var el=e.target; while(el && el!==$('kAc') && !el.getA
     clearTimeout(pendTmr[d.id]); pendTmr[d.id]=setTimeout(function(){ var x=pendT[d.id]; delete pendT[d.id]; acSet(d,'target_temperature',x); },900); }
 });
 var tTimer=null;
-function kKeep(){ clearTimeout(tTimer); tTimer=setTimeout(closeTemps,180000); }
+function kKeep(){ resetIdle(); }
 function openTemps(){ $('tempOv').className='ov show'; renderKlimaat(); kKeep(); }
 function closeTemps(){ $('tempOv').className='ov'; clearTimeout(tTimer); }
 
@@ -1620,7 +1627,7 @@ setInterval(function(){ if(doorOpen || alarmOn || Date.now()-bootT < 3*3600000) 
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
   .then(function(t){ if(t && t.indexOf('var VERSION=')>=0) location.reload(); }).catch(function(){}); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-27-v37';
+var VERSION='2026-11-28-v40';
 try{ document.getElementById('ver').textContent=VERSION.replace(/^\d{4}-/,''); }catch(e){}
 setInterval(function(){
   if(DEMO) return;
@@ -1637,7 +1644,7 @@ function demoApi(method,path){
   if(path.indexOf('moods')>=0) return {m1:{name:'Verguld'},m2:{name:'Oosters'}};
   if(path.indexOf('advancedflow')>=0) return {f1:{name:CFG.cookFlow},f2:{name:CFG.nightFlow},f3:{name:CFG.allOffFlow},f4:{name:CFG.garlandOnFlow},f5:{name:CFG.garlandOffFlow}};
   if(/logic\/variable\/[^\/]+$/.test(path)) return {value:false};
-  if(path.indexOf('logic')>=0) return {v1:{name:'Deurbel',value:false},v2:{name:'Giorgio schatting',value:83.4},v3:{name:'Giorgio limiet',value:90},v4:{name:'Giorgio limiet aan',value:false},v5:{name:'Giorgio vol laden',value:false}};
+  if(path.indexOf('logic')>=0) return {v1:{name:'Deurbel',value:false},v2:{name:'Giorgio schatting',value:83.4},v3:{name:'Giorgio limiet',value:90},v4:{name:'Giorgio limiet aan',value:false},v5:{name:'Giorgio vol laden',value:false},v6:{name:'Alarm status',value:(location.search.indexOf('aan')>0?'aan':'uit')}};
   if(path.indexOf('users')>=0) return {a:{name:'Jessica Van Houte',present:false,role:'user'},b:{name:'Dennis Verstraate',present:true,role:'owner'}};
   if(path.indexOf('devices')>=0){
     var D={}, n=0;
