@@ -1208,7 +1208,7 @@ var MON=['januari','februari','maart','april','mei','juni','juli','augustus','se
 function tick(){ var d=new Date(); $('clock').textContent=pad(d.getHours())+':'+pad(d.getMinutes()); $('date').textContent=DAYS[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]; }
 function wxInfo(c){
   if(c===0) return ['☀️','Zonnig']; if(c<=2) return ['🌤','Licht bewolkt']; if(c===3) return ['☁️','Bewolkt'];
-  if(c<=48) return ['🌁','Mist']; if(c<=57) return ['🌦','Motregen']; if(c<=67) return ['🌧','Regen'];
+  if(c<=48) return ['☁️','Mist']; if(c<=57) return ['🌦','Motregen']; if(c<=67) return ['🌧','Regen'];
   if(c<=77) return ['🌨','Sneeuw']; if(c<=82) return ['🌧','Buien']; if(c<=86) return ['🌨','Sneeuwbuien']; return ['⛈','Onweer'];
 }
 function loadWeather(){
@@ -1728,7 +1728,7 @@ setInterval(function(){ if(doorOpen || alarmOn || Date.now()-bootT < 3*3600000) 
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
   .then(function(t){ if(t && t.indexOf('var VERSION=')>=0) location.reload(); }).catch(function(){}); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-28-v44';
+var VERSION='2026-11-28-v45';
 try{ document.getElementById('ver').textContent=VERSION.replace(/^\d{4}-/,''); }catch(e){}
 setInterval(function(){
   if(DEMO) return;
