@@ -201,6 +201,29 @@
   .ctile .a{font-size:17px;display:flex;align-items:center;}
   .ctile .a .ai{font-style:normal;margin-right:6px;font-size:18px;}
   .ctile .a .ai.off{color:#5c6270;font-size:16px;}
+  .td{display:flex;align-items:center;min-height:34px;font-size:15px;}
+  .td .ck{width:26px;height:26px;border-radius:13px;border:2px solid #6e7584;flex:none;margin-right:10px;position:relative;}
+  .td .ck.p4{border-color:#ff6b6b;} .td .ck.p3{border-color:#f2a93b;} .td .ck.p2{border-color:#5aa9ff;}
+  .td .ck:after{content:'';position:absolute;left:-10px;top:-10px;right:-10px;bottom:-10px;}
+  .td.done .ck{background:#2fbf68;border-color:#2fbf68;} .td.done .ck:before{content:'✓';position:absolute;left:5px;top:1px;font-size:15px;color:#06210f;font-weight:700;}
+  .td.done .tx{text-decoration:line-through;color:var(--mut);}
+  .td .tx{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .td .du{font-size:12px;color:var(--mut);margin-left:8px;flex:none;} .du.late{color:#ff6b6b;} .du.today{color:#f2a93b;}
+  .tdm{color:var(--mut);font-size:14px;padding:4px 0;}
+  .panel.dpanel{width:1000px;height:720px;max-height:none;overflow:hidden;display:flex;flex-direction:column;padding:18px 22px;}
+  .dpanel .hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+  .dpanel .hd h2{margin:0;} .dpanel .hd small{color:var(--mut);font-size:14px;}
+  .dpanel .x{font-size:16px;font-weight:500;background:rgba(255,255,255,.1);padding:10px 18px;border-radius:12px;}
+  .tdadd{display:flex;} .tdadd input{flex:1;font-size:18px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--txt);-webkit-user-select:text;user-select:text;outline:none;}
+  .tdadd .act{width:150px;margin-left:10px;height:auto;}
+  .tdundo{display:none;margin-top:10px;background:#1f5f3a;border-radius:12px;padding:10px 14px;font-size:15px;}
+  .tdundo.show{display:flex;justify-content:space-between;align-items:center;} .tdundo b{background:rgba(255,255,255,.18);padding:6px 12px;border-radius:10px;font-weight:600;}
+  .tdlist{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-top:12px;}
+  .tdlist .td{background:var(--card2);border-radius:14px;padding:12px 16px;margin-bottom:8px;font-size:18px;min-height:56px;}
+  .tdlist .td .ck{width:32px;height:32px;border-radius:16px;margin-right:16px;} .tdlist .td.done .ck:before{left:7px;top:3px;font-size:18px;}
+  .tdlist .td.sub{margin-left:44px;font-size:16px;}
+  .tdlist .tx{white-space:normal;} .tdlist .tx small{display:block;font-size:13px;color:var(--mut);margin-top:2px;}
+  .tdlist .du{font-size:14px;}
   .panel.kpanel{width:1000px;height:720px;max-height:none;overflow:hidden;display:flex;flex-direction:column;padding:18px 22px;}
   .kpanel .hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
   .kpanel .hd h2{margin:0;} .kpanel .hd small{color:var(--mut);font-size:14px;}
@@ -367,6 +390,10 @@
     <div class="card grow" id="tempCard">
       <div class="lbl">Klimaat <span style="float:right">meer ›</span></div>
       <div id="climTile"></div>
+    </div>
+    <div class="card" id="todoCard">
+      <div class="lbl">Taken <span style="float:right" id="todoN">meer ›</span></div>
+      <div id="todoTile"><div class="tdm">Laden…</div></div>
     </div>
   </div>
 
@@ -550,6 +577,14 @@
   </div>
 </div></div>
 
+<!-- taken -->
+<div class="ov" id="todoOv"><div class="panel dpanel">
+  <div class="hd"><div><h2>Taken</h2><small id="tdSub">Todoist · Thuis</small></div><div class="x" id="todoClose">Sluiten</div></div>
+  <div class="tdadd"><input id="tdIn" type="text" placeholder="Nieuwe taak…" autocomplete="off"><div class="act" id="tdAdd">Toevoegen</div></div>
+  <div class="tdundo" id="tdUndo"></div>
+  <div class="tdlist" id="tdList"></div>
+</div></div>
+
 <!-- klimaat -->
 <div class="ov" id="tempOv"><div class="panel kpanel">
   <div class="hd"><div><h2>Klimaat</h2><small id="kSub"></small></div><div class="x" id="tClose">Sluiten</div></div>
@@ -598,7 +633,7 @@ var CFG = {
           ['Temp Wasruimte','Wasruimte'],['Temp Garage','Garage'],['Temp Domein Jes','Domein Jes']],
   mainTemp: 'Temp Woonkamer',
   aircos: [['Airco woonkamer','Temp Woonkamer','Woonkamer'],['Airco slaapkamer','Temp Slaapkamer','Slaapkamer']],
-  p1: 'P1 Meter', enFeatured: ['Stekker airco woonkamer','Stekker airco slaapkamer','Laadpaal'], prices: 'Energieprijzen', ev: 'Laadpaal', car: 'Giorgio', hvMin: 5,
+  p1: 'P1 Meter', enFeatured: ['Stekker airco woonkamer','Stekker airco slaapkamer','Laadpaal'], prices: 'Energieprijzen', ev: 'Laadpaal', car: 'Giorgio', hvMin: 5, todoScript: 'f00cf87a-acef-4428-935f-a221a06e068c', todoMain: 3,
   robot: 'Jacqueline', robotKitchenRooms: 'keuken,washok', routines: [['Stofzuigen, dan dweilen','Alles'],['Keuken dweil','Keuken'],['Woonkamer','Woonkamer'],['Begaande grond','Begane grond']],
   musicZone: 'Keuken',
   motion: 'Beweging keuken',
@@ -1141,7 +1176,7 @@ function renderFavs(){
 
 /* ---------- schermen wisselen ---------- */
 var cur=1, mapTimer=null, idleT=null;
-function idleHome(){ if(cur!==1) go(1); closeCar(); closeEn(); closeWx(); closeTemps(); }
+function idleHome(){ if(cur!==1) go(1); closeCar(); closeEn(); closeWx(); closeTemps(); closeTodo(); }
 function resetIdle(){ clearTimeout(idleT); idleT=setTimeout(idleHome,180000); }
 document.addEventListener('touchstart',resetIdle,{passive:true}); document.addEventListener('mousedown',resetIdle);
 function go(n){
@@ -1538,6 +1573,66 @@ function demoWx(){ var t0=new Date(); t0.setMinutes(0,0,0); var H={time:[],tempe
   for(var k=0;k<14;k++){ var dd=new Date(Date.now()+k*86400000); D.time.push(dd.getFullYear()+'-'+pad(dd.getMonth()+1)+'-'+pad(dd.getDate())); D.weather_code.push([3,61,2,80,0,1,63,3,2,61,0,1,3,80][k]); D.temperature_2m_max.push(5+k%4); D.temperature_2m_min.push(1+k%3); D.precipitation_sum.push([0,4.2,0,2.1,0,0,6,0.2,0,3,0,0,0,1.5][k]); D.precipitation_probability_max.push(50); D.wind_speed_10m_max.push(20+k*2); D.wind_direction_10m_dominant.push(k*40); }
   return {hourly:H,daily:D}; }
 
+/* ---------- taken (todoist via homeyscript) ---------- */
+var TD={list:null, done:{}, undo:null, undoT:null, loading:false};
+function tdRun(arg){
+  if(DEMO) return Promise.resolve(arg==='list'? JSON.stringify(demoTodo()) : 'ok');
+  return api('POST','app/com.athom.homeyscript/script/'+CFG.todoScript+'/run',{args:[arg]}).then(function(r){
+    if(!r || r.success===false) throw new Error((r&&r.returns&&r.returns.message)||'script mislukt'); return r.returns; });
+}
+function loadTodo(){ if(TD.loading) return; TD.loading=true;
+  tdRun('list').then(function(j){ TD.loading=false; var l=JSON.parse(j||'[]'); TD.list=l; renderTodo(); })
+    .catch(function(e){ TD.loading=false; if(TD.list===null){ $('todoTile').innerHTML='<div class="tdm">Taken niet bereikbaar</div>'; } }); }
+function tdDay(due){ if(!due) return null; var d=new Date(due.length<=10? due+'T12:00:00' : due); return isNaN(d)? null : d; }
+function tdDue(t){ var d=tdDay(t.due); if(!d) return ['',''];
+  var n=new Date(), a=new Date(n.getFullYear(),n.getMonth(),n.getDate()), b=new Date(d.getFullYear(),d.getMonth(),d.getDate()), diff=Math.round((b-a)/86400000);
+  var hm= t.due && t.due.length>10 ? ' '+pad(d.getHours())+':'+pad(d.getMinutes()) : '';
+  var txt= diff<0? (diff===-1?'gisteren':(-diff)+' dagen te laat') : diff===0?'vandaag'+hm : diff===1?'morgen'+hm : diff<7? DAYS[d.getDay()].slice(0,2)+' '+d.getDate()+' '+MON[d.getMonth()].slice(0,3)+hm : d.getDate()+' '+MON[d.getMonth()].slice(0,3)+hm;
+  return [(t.rec?'↻ ':'')+txt, diff<0?'late':diff===0?'today':'']; }
+function tdSorted(){ var l=(TD.list||[]).slice();
+  l.sort(function(x,y){ var a=tdDay(x.due), b=tdDay(y.due); if(a&&b) return a-b; if(a) return -1; if(b) return 1; return (y.p-x.p)||(x.o-y.o); });
+  var top=l.filter(function(t){ return !t.par; }), out=[];
+  top.forEach(function(t){ out.push(t); l.forEach(function(c){ if(c.par===t.id) out.push(c); }); });
+  l.forEach(function(c){ if(c.par && out.indexOf(c)<0) out.push(c); });
+  return out; }
+function tdRow(t,big){ var du=tdDue(t), done=!!TD.done[t.id];
+  return '<div class="td'+(done?' done':'')+(big&&t.par?' sub':'')+'" data-id="'+esc(t.id)+'"><div class="ck p'+t.p+'" data-ck="1"></div><div class="tx">'+esc(t.c)+(big&&t.d?'<small>'+esc(t.d)+'</small>':'')+'</div>'+(du[0]?'<span class="du '+du[1]+'">'+du[0]+'</span>':'')+'</div>'; }
+function renderTodo(){
+  if(TD.list===null) return;
+  var l=tdSorted(), open=l.filter(function(t){ return !TD.done[t.id]; }).length, main=l.filter(function(t){ return !t.par; }).slice(0,CFG.todoMain||4);
+  $('todoN').textContent=(open?open+' open · ':'')+'meer ›';
+  var rest=l.filter(function(t){ return !t.par; }).length-main.length;
+  $('todoTile').innerHTML= l.length? main.map(function(t){ return tdRow(t,false); }).join('')+'' : '<div class="tdm">Niks te doen 🎉</div>';
+  if($('todoOv').className.indexOf('show')>=0){
+    $('tdList').innerHTML= l.length? l.map(function(t){ return tdRow(t,true); }).join('') : '<div class="tmsg">Niks te doen 🎉</div>';
+    $('tdSub').textContent='Todoist · Thuis · '+open+' open';
+  }
+}
+function tdClose(id){ var t=null; (TD.list||[]).forEach(function(x){ if(x.id===id) t=x; }); if(!t || TD.done[id]) return;
+  TD.done[id]=1; renderTodo();
+  tdRun('close:'+id).then(function(){
+    TD.undo=t; $('tdUndo').innerHTML='<span>✓ '+esc(t.c)+'</span><b id="tdUndoB">Ongedaan maken</b>'; $('tdUndo').className='tdundo show';
+    tap($('tdUndoB'),function(){ var u=TD.undo; if(!u) return; $('tdUndo').className='tdundo'; TD.undo=null;
+      tdRun('reopen:'+u.id).then(function(){ delete TD.done[u.id]; loadTodo(); toast('Teruggezet'); }).catch(function(e){ showErr('Taken: '+e.message); }); });
+    clearTimeout(TD.undoT); TD.undoT=setTimeout(function(){ $('tdUndo').className='tdundo'; TD.undo=null; },10000);
+    if($('todoOv').className.indexOf('show')<0) toast('✓ '+t.c);
+    setTimeout(function(){ if(!t.rec) TD.list=(TD.list||[]).filter(function(x){ return x.id!==id; }); delete TD.done[id]; renderTodo(); loadTodo(); },2500);
+  }).catch(function(e){ delete TD.done[id]; renderTodo(); showErr('Taken: '+e.message); }); }
+function tdAdd(){ var v=$('tdIn').value.replace(/^\s+|\s+$/g,''); if(!v) return; $('tdIn').value=''; $('tdIn').blur(); resetIdle();
+  tdRun('add:'+v).then(function(){ toast('Taak toegevoegd'); loadTodo(); }).catch(function(e){ showErr('Taken: '+e.message); }); }
+function tdTap(box){ return function(e){ var el=e.target, ck=false;
+  while(el && el!==box && !(el.getAttribute && el.getAttribute('data-id'))){ if(el.getAttribute && el.getAttribute('data-ck')) ck=true; el=el.parentNode; }
+  if(el && el!==box && (ck || box===$('tdList'))){ tdClose(el.getAttribute('data-id')); return; }
+  if(box===$('todoTile')) openTodo(); }; }
+function openTodo(){ $('todoOv').className='ov show'; $('tdUndo').className='tdundo'; renderTodo(); loadTodo(); resetIdle(); }
+function closeTodo(){ $('todoOv').className='ov'; $('tdIn').blur(); }
+tap($('todoTile'),tdTap($('todoTile'))); tap($('todoCard'),openTodo); tap($('tdList'),tdTap($('tdList')));
+tap($('todoClose'),closeTodo); tap($('todoOv'),closeTodo); tap(document.querySelector('.dpanel'),function(){});
+tap($('tdAdd'),tdAdd); $('tdIn').addEventListener('keydown',function(e){ if(e.keyCode===13){ e.preventDefault(); tdAdd(); } });
+function demoTodo(){ var d=new Date(), f=function(o){ var x=new Date(d.getTime()+o*86400000); return x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate()); };
+  return [{id:'a',c:'Picnic bestellen',d:'',due:f(0),rec:false,p:1,o:2},{id:'b',c:'Wachtwoorden updaten',d:'Begin met e-mail en bank',due:null,rec:false,p:3,o:1},
+    {id:'c',c:'Kliko aan de weg',d:'',due:f(-1),rec:true,p:4,o:3},{id:'d',c:'Filters airco schoonmaken',d:'',due:f(3),rec:false,p:1,o:4},{id:'e',c:'Lamp garage vervangen',d:'',due:null,rec:false,p:1,o:5}]; }
+
 /* ---------- klimaat ---------- */
 var MODES=[['heat','🔥','Verwarmen','verwarmt'],['cool','❄️','Koelen','koelt'],['dry','💧','Drogen','droogt'],['fan','🌀','Ventileren','ventileert'],['auto','⟳','Auto','auto']];
 var FANS=[['silent','Stil'],['low','Laag'],['medium','Midden'],['high','Hoog'],['full','Max'],['auto','Auto']];
@@ -1556,7 +1651,7 @@ function renderClim(){
     h+='<div class="ctile"><div class="r"><span>'+a[2]+(t.lb?' 🔋':'')+'</span><b class="'+(t.old?'old':'')+'">'+fmtT(t.v)+'</b></div>'+
        (ac?'<div class="a'+(acOn(ac)?' on':'')+'">'+acIcon(ac)+'</div>':'')+'</div>'; });
   var oa=byName(CFG.aircos[0][0]), ot=cap(oa,'measure_temperature.outside');
-  if(ot!==null) h+='<div class="ctile out"><div class="r"><span>Buiten</span><b>'+fmtT(ot)+'</b></div></div>';
+  if(false && ot!==null) h+='<div class="ctile out"><div class="r"><span>Buiten</span><b>'+fmtT(ot)+'</b></div></div>';
   $('climTile').innerHTML=h;
   if($('tempOv').className.indexOf('show')>=0) renderKlimaat();
 }
@@ -1617,6 +1712,7 @@ function start(){
   setInterval(pollMotion, 3000);
   camLoop(function(){ return doorOpen ? $('doorImg') : $('camImg'); }, function(){ return doorOpen ? 700 : 2000; });
   loadEZ(); setInterval(loadEZ, 30*60*1000);
+  loadTodo(); setInterval(function(){ if(!asleep) loadTodo(); }, 60000);
 }
 tick(); setInterval(tick,10000);
 loadWeather(); setInterval(loadWeather, 30*60*1000);
@@ -1627,7 +1723,7 @@ setInterval(function(){ if(doorOpen || alarmOn || Date.now()-bootT < 3*3600000) 
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
   .then(function(t){ if(t && t.indexOf('var VERSION=')>=0) location.reload(); }).catch(function(){}); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-28-v40';
+var VERSION='2026-11-28-v41';
 try{ document.getElementById('ver').textContent=VERSION.replace(/^\d{4}-/,''); }catch(e){}
 setInterval(function(){
   if(DEMO) return;
