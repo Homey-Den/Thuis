@@ -84,7 +84,7 @@
   .rbtns{display:grid;grid-template-columns:1fr 1fr 1fr 50px;grid-gap:6px;margin-top:10px;}
   .rbtns .act{font-size:13px;padding:0 4px;text-align:center;line-height:1.15;}
   .rbtns .act{height:44px;}
-  #roboCard .rbtns{grid-template-columns:1fr 1fr;}
+  #roboCard .rbtns{grid-template-columns:1fr 1fr;grid-gap:6px;margin-top:8px;} #roboCard .rbtns .act{height:36px;}
   #roboCard .robo .rimg{width:42px;height:42px;margin-right:10px;}
 
   /* muziektegel */
@@ -195,13 +195,16 @@
   .dots i.on{background:#9aa0ad;}
 
   /* temperatuurgrafiek */
-  .ctile + .ctile{margin-top:14px;}
+  .ctile{display:flex;justify-content:space-between;align-items:center;}
+  .ctile + .ctile{margin-top:10px;}
+  .ctile .l span{font-size:15px;color:var(--mut);}
+  .ctile > b{font-size:28px;font-weight:300;} .ctile > b.old{color:#5c6270;}
   .ctile .r{display:flex;justify-content:space-between;align-items:baseline;}
   .ctile .r span{font-size:15px;color:var(--mut);} .ctile .r b{font-size:30px;font-weight:300;}
   .ctile .r b.old{color:#5c6270;}
   .ctile .a{font-size:13px;margin-top:1px;color:var(--mut);} .ctile .a.on{color:var(--txt);}
-  .ctile .a{font-size:17px;display:flex;align-items:center;}
-  .ctile .a .ai{font-style:normal;margin-right:6px;font-size:18px;}
+  .ctile .a{font-size:15px;display:flex;align-items:center;margin-top:1px;}
+  .ctile .a .ai{font-style:normal;margin-right:5px;font-size:15px;}
   .ctile .a .ai.off{color:#5c6270;font-size:16px;}
   .td{display:flex;align-items:center;min-height:34px;font-size:15px;}
   .td .ck{width:26px;height:26px;border-radius:13px;border:2px solid #6e7584;flex:none;margin-right:10px;position:relative;}
@@ -1650,8 +1653,8 @@ function tempOf(sensor,ac){ var d=byName(sensor), v=cap(d,'measure_temperature')
 function renderClim(){
   var h='';
   CFG.aircos.forEach(function(a){ var ac=byName(a[0]), t=tempOf(a[1],ac);
-    h+='<div class="ctile"><div class="r"><span>'+a[2]+(t.lb?' 🔋':'')+'</span><b class="'+(t.old?'old':'')+'">'+fmtT(t.v)+'</b></div>'+
-       (ac?'<div class="a'+(acOn(ac)?' on':'')+'">'+acIcon(ac)+'</div>':'')+'</div>'; });
+    h+='<div class="ctile"><div class="l"><span>'+a[2]+(t.lb?' 🔋':'')+'</span>'+(ac?'<div class="a'+(acOn(ac)?' on':'')+'">'+acIcon(ac)+'</div>':'')+'</div>'+
+       '<b class="'+(t.old?'old':'')+'">'+fmtT(t.v)+'</b></div>'; });
   var oa=byName(CFG.aircos[0][0]), ot=cap(oa,'measure_temperature.outside');
   if(false && ot!==null) h+='<div class="ctile out"><div class="r"><span>Buiten</span><b>'+fmtT(ot)+'</b></div></div>';
   $('climTile').innerHTML=h;
@@ -1725,7 +1728,7 @@ setInterval(function(){ if(doorOpen || alarmOn || Date.now()-bootT < 3*3600000) 
   fetch(location.pathname+'?nc='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
   .then(function(t){ if(t && t.indexOf('var VERSION=')>=0) location.reload(); }).catch(function(){}); }, 60000);
 /* automatisch bijwerken: kijkt elke 5 minuten of er een nieuwe versie op GitHub staat */
-var VERSION='2026-11-28-v43';
+var VERSION='2026-11-28-v44';
 try{ document.getElementById('ver').textContent=VERSION.replace(/^\d{4}-/,''); }catch(e){}
 setInterval(function(){
   if(DEMO) return;
